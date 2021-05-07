@@ -14,7 +14,12 @@ cursor = output['cursor']
 for i in output['data']:
     if (i['type'] == "poc_receipts_v1"):
         timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d %I:%M:%S")
-        print(timestamp, i['path'][0]['challengee'], i['path'][0]['geocode']['short_street'], i['path'][0]['geocode']['short_city'], len(i['path'][0]['witnesses']))
+        challengee = i['path'][0]['challengee']
+        street = i['path'][0]['geocode']['short_street']
+        city = i['path'][0]['geocode']['short_city']
+        witnesses = len(i['path'][0]['witnesses'])
+      
+        print(timestamp, challengee, street, city, witnesses)
         
 # for loop to go thrught and print the data after using cursor to go to next page
 url=url+'?cursor='+cursor
@@ -23,4 +28,9 @@ output = response.json()
 for i in output['data']:
     if (i['type'] == "poc_receipts_v1"):
       timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d %I:%M:%S")
-      print(timestamp, i['path'][0]['challengee'], i['path'][0]['geocode']['short_street'], i['path'][0]['geocode']['short_city'], len(i['path'][0]['witnesses']))
+      challengee = i['path'][0]['challengee']
+      street = i['path'][0]['geocode']['short_street']
+      city = i['path'][0]['geocode']['short_city']
+      witnesses = len(i['path'][0]['witnesses'])
+      
+      print(timestamp, challengee, street, city, witnesses)
