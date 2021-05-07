@@ -68,6 +68,7 @@ def summary(file):
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
+    # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
     occurrencesOne = np.count_nonzero(data == 1)
     occurrencesTwo = np.count_nonzero(data == 2)
     occurrencesThree = np.count_nonzero(data == 3)
@@ -76,15 +77,16 @@ def summary(file):
     occurrencesMore = np.count_nonzero(data > 5)
     
     print(
-        "1 Witnesses : ", occurrencesOne,"\n" 
-        "2 Witnesses : ", occurrencesTwo,"\n"
-        "3 Witnesses : ", occurrencesThree,"\n"
-        "4 Witnesses : ", occurrencesFour,"\n"
-        "5 Witnesses : ", occurrencesFive,"\n"
-        "More than 5 Witnesses :", occurrencesMore
+        "1 Witnesses : ", occurrencesOne,"times\n" 
+        "2 Witnesses : ", occurrencesTwo,"times\n"
+        "3 Witnesses : ", occurrencesThree,"times\n"
+        "4 Witnesses : ", occurrencesFour,"times\n"
+        "5 Witnesses : ", occurrencesFive,"times\n"
+        "More than 5 Witnesses :", occurrencesMore, "times"
         )
    
-# Update as needed
+# Update as needed 
+# Change the Network Adderess for different ones
 data = get_data('112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg')
 df = pd.DataFrame(data)
 df.to_csv('hotspotData.csv')
