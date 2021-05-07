@@ -55,7 +55,15 @@ def get_data(hotspot):
     
     return tableList
 
+def sortCSV(file):
+    # after the file is written we need to sort the csv file using pandas library 
+    df = pd.read_csv(file)
+    sorted_df = df.sort_values(by=["Witnesses"], ascending=True)
+    sorted_df.to_csv('Sorted_hotspotData.csv', index=False)
+    
 # Update as needed 
 data = get_data('112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg')
 df = pd.DataFrame(data)
 df.to_csv('hotspotData.csv')
+sortCSV('hotspotData.csv')
+
