@@ -84,6 +84,15 @@ def summary(file):
         "5 Witnesses : ", occurrencesFive,"times\n"
         "More than 5 Witnesses :", occurrencesMore, "times"
         )
+    
+    details(file)
+    
+# Need to print the routers that we are the only one to see 
+def details(file):
+    new_col_list = ["Challengee"]
+    # df = pd.read_csv(file, usecols=col_list)
+    usersDf = pd.read_csv(file,  skipfooter= 60, usecols = new_col_list, engine='python')
+    print( usersDf)
    
 # Update as needed 
 # Change the Network Adderess for different ones
@@ -92,4 +101,5 @@ df = pd.DataFrame(data)
 df.to_csv('hotspotData.csv')
 sortCSV('hotspotData.csv')
 summary('Sorted_hotspotData.csv')
+
 
