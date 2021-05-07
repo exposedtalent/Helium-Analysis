@@ -3,6 +3,8 @@ import json
 from datetime import datetime
 from beeprint import pp
 import pandas as pd
+import csv
+import numpy as np
 
 def get_data(hotspot):
     url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
@@ -61,9 +63,31 @@ def sortCSV(file):
     sorted_df = df.sort_values(by=["Witnesses"], ascending=True)
     sorted_df.to_csv('Sorted_hotspotData.csv', index=False)
     
-# Update as needed 
+def summary(file):
+    # Looks at only the Witnesses col and prints the num of Witnesses 
+    col_list = ["Witnesses"]
+    df = pd.read_csv(file, usecols=col_list)
+    data = df.values
+    occurrencesOne = np.count_nonzero(data == 1)
+    occurrencesTwo = np.count_nonzero(data == 2)
+    occurrencesThree = np.count_nonzero(data == 3)
+    occurrencesFour = np.count_nonzero(data == 4)
+    occurrencesFive = np.count_nonzero(data == 5)
+    occurrencesMore = np.count_nonzero(data > 5)
+    
+    print(
+        "1 Witnesses : ", occurrencesOne,"\n" 
+        "2 Witnesses : ", occurrencesTwo,"\n"
+        "3 Witnesses : ", occurrencesThree,"\n"
+        "4 Witnesses : ", occurrencesFour,"\n"
+        "5 Witnesses : ", occurrencesFive,"\n"
+        "More than 5 Witnesses :", occurrencesMore
+        )
+   
+# Update as needed
 data = get_data('112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg')
 df = pd.DataFrame(data)
 df.to_csv('hotspotData.csv')
 sortCSV('hotspotData.csv')
+summary('Sorted_hotspotData.csv')
 
