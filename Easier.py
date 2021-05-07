@@ -1,28 +1,21 @@
 import requests
-import pprint
-import json
 from datetime import datetime
-# Using this we can change the hotspot by just putting in the value of the Hotspoot network address
-hotspot = ('h1124jdKvWJeBxShhSuwC135xG7jmV55iLchtQxtELj65DHwP56ZY')
-url = ('https://api.helium.io/v1/hotspots/' + hotspot + '/activity')
-# We get the json file from the url
+
+hotspot='112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg'
+
+url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
 response = requests.get(url)
-data = response.json()
-# add a cursor variable to go to next pages of the data
-# cursor = data['cursor']
+output = response.json()
+cursor=output['cursor']
+for i in output['data']:
+    if (i['type'] == "poc_receipts_v1"):
+      timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d %I:%M:%S")
+      print(timestamp, i['path'][0]['challengee'], i['path'][0]['geocode']['short_street'], i['path'][0]['geocode']['short_city'], len(i['path'][0]['witnesses']))
 
-# data = response.json()
-# f = open(response)
-# data = json.load(f)
-
-print(data)
-# for i in data['data']:
-#     if(i['type'] == "popoc_receipts_v1"):
-#         time = datetime.fromtimestamp(i['time']).strftime('%Y-%m-%d-%H:%M:%S')
-#         print(time, i['path'])
-    
-    
-# for i in data['data']:
-#    print(i)
-
-
+url=url+'?cursor='+cursor
+response = requests.get(url)
+output = response.json()
+for i in output['data']:
+    if (i['type'] == "poc_receipts_v1"):
+      timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d %I:%M:%S")
+      print(timestamp, i['path'][0]['challengee'], i['path'][0]['geocode']['short_street'], i['path'][0]['geocode']['short_city'], len(i['path'][0]['witnesses']))
