@@ -21,11 +21,16 @@ for i in output['data']:
         street = i['path'][0]['geocode']['short_street']
         city = i['path'][0]['geocode']['short_city']
         witnesses = len(i['path'][0]['witnesses'])
+        my_dict['data'].append({
+            'TimeStamp' : timestamp,
+            'Challengee' : challengee,
+            'Street'    : street,
+            'City'      : city,
+            'Witnesses' : witnesses
+            
+        })
         
-        print(timestamp,"\t", challengee, "\t", street, city, witnesses)
-        
-        
-# for loop to go thrught and print the data after using cursor to go to next page
+# for loop to go throught and print the data after using cursor to go to next page
 url=url+'?cursor='+cursor
 response = requests.get(url)
 output = response.json()
@@ -42,7 +47,7 @@ for i in output['data']:
             'Challengee' : challengee,
             'Street'    : street,
             'City'      : city,
-            'Witnesses' : witnesses,
+            'Witnesses' : witnesses
             
         })
 
