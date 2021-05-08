@@ -24,15 +24,19 @@ def analyze_hotspot(hotspot, pagecount):
         cursor=new_data['cursor']
         url=base_url+'?cursor='+cursor
         pagecount -= 1
+        
+        for i in output['data']:
+            if (i['type'] == "poc_receipts_v1") and (i['path'][0]['challengee'] != hotspot):
+                timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d-%I:%M:%S")
+                challengee = i['path'][0]['challengee']
+                street = i['path'][0]['geocode']['short_street']
+                city = i['path'][0]['geocode']['short_city']
+                witnesses = len(i['path'][0]['witnesses'])
+                print(timestamp, challengee, street, city, witnesses)
+    
+    
 
-    for i in output['data']:
-        if (i['type'] == "poc_receipts_v1") and (i['path'][0]['challengee'] != hotspot):
-            timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d-%I:%M:%S")
-            challengee = i['path'][0]['challengee']
-            street = i['path'][0]['geocode']['short_street']
-            city = i['path'][0]['geocode']['short_city']
-            witnesses = len(i['path'][0]['witnesses'])
-            print(timestamp, challengee, street, city, witnesses)
+    
             
 
 hs_mg='112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg'
@@ -41,7 +45,7 @@ hs_jh='112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd'
 hs_jc='112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx'
 
 print("==================== "+ hs_mg + " ====================")
-analyze_hotspot(hs_mg, 2)
+analyze_hotspot(hs_mg, 3)
 #print "==================== "+ hs_ag + "==============="
 #analyze_hotspot(hs_ag)
 #print "==================== "+ hs_jh + "==============="
