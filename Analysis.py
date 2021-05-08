@@ -10,7 +10,7 @@
 import requests
 import json
 from datetime import datetime
-from beeprint import pp
+import pprint
 import pandas as pd
 import csv
 import numpy as np
@@ -81,45 +81,54 @@ def summary(file):
     new_col_list = ["Challengee"]
     df2 = pd.read_csv(file, usecols=new_col_list)
     Challengee = df2
-    # This prints the rounter when we are the only one witnessing 
-    usersDf = pd.read_csv(file,  skipfooter= numLines-occurOne, usecols = new_col_list, engine='python')
-    remove_dup = np.unique(usersDf).tolist()    # Removes the duplicates
     print(
-        "Rounter with 1 witnesses :\n", remove_dup, "\n",
-        "Rounters with 1 witnesses :\n", Challengee[0:occurOne].values, "\n",
-        "Rounters with 2 witnesses :\n", Challengee[occurOne:occurOne+occurTwo].values, "\n",
-        "Rounter with 3 witnesses :\n", Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values, "\n",
-        "Rounter with 4 witnesses :\n", Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values, "\n",
-        "Rounter with 5 witnesses :\n", Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values
+        "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n"
+        "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n",
+        "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n",
+        "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n",
+        "Rounter with 5 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values), "\n"
     )
+def remove_dup(x):
+    tuple_line = [tuple(pt) for pt in x] # convert list of list into list of tuple
+    tuple_new_line = sorted(set(tuple_line),key=tuple_line.index) # remove duplicated element
+    new_line = [list(t) for t in tuple_new_line] # convert list of tuple into list of list
+    return new_line
 
         
-hs_mg='112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg'
-hs_ag='112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc'
-hs_jh='112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd'
-hs_jc='112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx'
+hotspots = ['112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
+            '112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
+            '112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
+            '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx' ]
+pageNum = int(input("Enter the page amount to check : "))
 
-print("==================== "+"Clever Ivory Raccoon"+ " =====================\n")
-data = analyze_hotspot(hs_mg, 4)
-df = pd.DataFrame(data)
-df.to_csv('hotspotData.csv')
-sortCSV('hotspotData.csv')
-summary('Sorted_hotspotData.csv')
-print ("==================== "+ "Brilliant Latte Bear" + "===================\n")
-data = analyze_hotspot(hs_ag, 4)
-df = pd.DataFrame(data)
-df.to_csv('hotspotData.csv')
-sortCSV('hotspotData.csv')
-summary('Sorted_hotspotData.csv')
-print ("==================== "+ "Silly Aqua Carp" + "=========================\n")
-data = analyze_hotspot(hs_jh, 4)
-df = pd.DataFrame(data)
-df.to_csv('hotspotData.csv')
-sortCSV('hotspotData.csv')
-summary('Sorted_hotspotData.csv')
-print ("==================== "+ "Fluffy Taupe Aphid" + "======================\n")
-data = analyze_hotspot(hs_jc, 4)
-df = pd.DataFrame(data)
-df.to_csv('hotspotData.csv')
-sortCSV('hotspotData.csv')
-summary('Sorted_hotspotData.csv')
+for i in range(len(hotspots)):
+    data = analyze_hotspot(hotspots[i], pageNum)
+    df = pd.DataFrame(data)
+    df.to_csv('hotspotData.csv')
+    sortCSV('hotspotData.csv')
+    summary('Sorted_hotspotData.csv')
+# pageNum = int(input("Enter the page amount to check : "))
+# print("==================== "+"Clever Ivory Raccoon"+ " =====================\n")
+# data = analyze_hotspot(hs_mg, pageNum)
+# df = pd.DataFrame(data)
+# df.to_csv('hotspotData.csv')
+# sortCSV('hotspotData.csv')
+# summary('Sorted_hotspotData.csv')
+# print ("==================== "+ "Brilliant Latte Bear" + "===================\n")
+# data = analyze_hotspot(hs_ag, pageNum)
+# df = pd.DataFrame(data)
+# df.to_csv('hotspotData.csv')
+# sortCSV('hotspotData.csv')
+# summary('Sorted_hotspotData.csv')
+# print ("==================== "+ "Silly Aqua Carp" + "=========================\n")
+# data = analyze_hotspot(hs_jh, pageNum)
+# df = pd.DataFrame(data)
+# df.to_csv('hotspotData.csv')
+# sortCSV('hotspotData.csv')
+# summary('Sorted_hotspotData.csv')
+# print ("==================== "+ "Fluffy Taupe Aphid" + "======================\n")
+# data = analyze_hotspot(hs_jc, pageNum)
+# df = pd.DataFrame(data)
+# df.to_csv('hotspotData.csv')
+# sortCSV('hotspotData.csv')
+# summary('Sorted_hotspotData.csv')
