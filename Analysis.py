@@ -1,9 +1,6 @@
 # TODO
 # Remove the entire record if the own hotspot was an invalid witness
 # Remove the witness if it's marked invalid
-# Add an option to define how many pages to traverse/download
-# Move the page traversal/download into a function that runs through a loop and appends all the data into one json object
-# Prepare a summary and a detailed view
 # Load the list of hotspots from a file
 
 # Imports
@@ -21,6 +18,7 @@ def analyze_hotspot(hotspot, pagecount):
     base_url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
     url = base_url
     tableList = []
+    
     # While loop to go thrrough the num of pages specified by the user and get all the data from the Helium api
     while pagecount:
         response = requests.get(url)
@@ -29,6 +27,7 @@ def analyze_hotspot(hotspot, pagecount):
         cursor=new_data['cursor']
         url=base_url+'?cursor='+cursor
         pagecount -= 1
+        
         # For loop to parse the data coming from the json file
     for i in output['data']:
         if (i['type'] == "poc_receipts_v1") and (i['path'][0]['challengee'] != hotspot):
@@ -37,7 +36,7 @@ def analyze_hotspot(hotspot, pagecount):
             street = i['path'][0]['geocode']['short_street']
             city = i['path'][0]['geocode']['short_city']
             witnesses = len(i['path'][0]['witnesses'])
-                # Create a dict of the data
+            # Create a dict of the data
             if(witnesses != 0):
                 alltheData = {
                     'TimeStamp' : timestamp,
@@ -46,7 +45,7 @@ def analyze_hotspot(hotspot, pagecount):
                     'City'      : city,
                     'Witnesses' : witnesses
                 }
-                    # Append all of it to the tableList
+                # Append all of it to the tableList
                 tableList.append(alltheData)
     return tableList
     
@@ -55,6 +54,7 @@ def summary(file):
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
+    
     # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
     occurOne = np.count_nonzero(data == 1)
     occurTwo = np.count_nonzero(data == 2)
@@ -71,11 +71,13 @@ def summary(file):
         "5 Witnesses : ", occurFive,"times\n"
         "More than 5 Witnesses :", occurMore, "times\n"
         )
-    
+    # Detailed summary 
     new_col_list = ["Challengee"]
     df2 = pd.read_csv(file, usecols=new_col_list)
     Challengee = df2
+    
     print(
+        "========================= Names of the Hotspots =========================\n "
         "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n"
         "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n",
         "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n",
