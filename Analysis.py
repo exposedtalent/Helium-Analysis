@@ -17,36 +17,41 @@ import numpy as np
 
 def analyze_hotspot(hotspot, pagecount):
     
-    output={}
+    output = {}
     base_url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
     url = base_url
     tableList = []
+    # While loop to go thrrough the num of pages specified by the user and get all the data from the Helium api
     while pagecount:
         response = requests.get(url)
         new_data = response.json()
         new_output = output | new_data
         output.update(new_output)
-        cursor=new_data['cursor']
+        cursor = new_data['cursor']
         url=base_url+'?cursor='+cursor
         pagecount -= 1
-        
-        for i in output['data']:
-            if (i['type'] == "poc_receipts_v1") and (i['path'][0]['challengee'] != hotspot):
-                timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d-%I:%M:%S")
-                challengee = i['path'][0]['challengee']
-                street = i['path'][0]['geocode']['short_street']
-                city = i['path'][0]['geocode']['short_city']
-                witnesses = len(i['path'][0]['witnesses'])
-                
+        # For loop to parse the data coming from the json file
+    for i in output['data']:
+        if (i['type'] == "poc_receipts_v1") and (i['path'][0]['challengee'] != hotspot):
+            timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d-%I:%M:%S")
+            challengee = i['path'][0]['challengee']
+            street = i['path'][0]['geocode']['short_street']
+            city = i['path'][0]['geocode']['short_city']
+            witnesses = len(i['path'][0]['witnesses'])
+                # Create a dict of the data
+            print(timestamp,challengee,street,city,witnesses)
+            if(witnesses != 0):
                 alltheData = {
-                'TimeStamp' : timestamp,
-                'Challengee' : challengee,
-                'Street'    : street,
-                'City'      : city,
-                'Witnesses' : witnesses
+                    'TimeStamp' : timestamp,
+                    'Challengee' : challengee,
+                    'Street'    : street,
+                    'City'      : city,
+                    'Witnesses' : witnesses
                 }
-                tableList.append(alltheData)
+                    # Append all of it to the tableList
+            tableList.append(alltheData)
     return tableList
+
 def sortCSV(file):
     # after the file is written we need to sort the csv file using pandas library 
     df = pd.read_csv(file)
@@ -58,6 +63,8 @@ def summary(file):
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
+    
+    
     
     # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
     occurOne = np.count_nonzero(data == 1)
@@ -73,30 +80,49 @@ def summary(file):
         "3 Witnesses : ", occurThree,"times\n"
         "4 Witnesses : ", occurFour,"times\n"
         "5 Witnesses : ", occurFive,"times\n"
-        "More than 5 Witnesses :", occurMore, "times"
+        "More than 5 Witnesses :", occurMore, "times\n"
         )
     
     new_col_list = ["Challengee"]
     df2 = pd.read_csv(file, usecols=new_col_list)
     Challengee = df2
+    # This prints the rounter when we are the only one witnessing 
     usersDf = pd.read_csv(file,  skipfooter= numLines-occurOne, usecols = new_col_list, engine='python')
-    #print(df2.values)
-         
+    remove_dup = np.unique(usersDf).tolist()    # Removes the duplicates
+    print("Rounter with 1 witnesses :\n", remove_dup, "\n")
+    print("Rounters with 1 witnesses :\n", Challengee[0:occurOne].values)
+    print("Rounters with 2 witnesses :\n", Challengee[occurOne:occurOne+occurTwo].values)
+    print("Rounter with 3 witnesses :\n", Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values)
+    print("Rounter with 4 witnesses :\n", Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values)
+    print("Rounter with 5 witnesses :\n", Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values)
+
+        
 hs_mg='112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg'
 hs_ag='112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc'
 hs_jh='112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd'
 hs_jc='112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx'
 
-print("==================== "+ hs_mg + " ====================")
-
+print("==================== "+"Clever Ivory Raccoon"+ " =====================\n")
 data = analyze_hotspot(hs_mg, 4)
 df = pd.DataFrame(data)
 df.to_csv('hotspotData.csv')
 sortCSV('hotspotData.csv')
 summary('Sorted_hotspotData.csv')
-#print "==================== "+ hs_ag + "==============="
-#analyze_hotspot(hs_ag)
-#print "==================== "+ hs_jh + "==============="
-#analyze_hotspot(hs_jh)
-#print "==================== "+ hs_jc + "==============="
-#analyze_hotspot(hs_jc)
+print ("==================== "+ "Brilliant Latte Bear" + "===================\n")
+data = analyze_hotspot(hs_ag, 4)
+df = pd.DataFrame(data)
+df.to_csv('hotspotData.csv')
+sortCSV('hotspotData.csv')
+summary('Sorted_hotspotData.csv')
+print ("==================== "+ "Silly Aqua Carp" + "=========================\n")
+data = analyze_hotspot(hs_jh, 4)
+df = pd.DataFrame(data)
+df.to_csv('hotspotData.csv')
+sortCSV('hotspotData.csv')
+summary('Sorted_hotspotData.csv')
+print ("==================== "+ "Fluffy Taupe Aphid" + "======================\n")
+data = analyze_hotspot(hs_jc, 4)
+df = pd.DataFrame(data)
+df.to_csv('hotspotData.csv')
+sortCSV('hotspotData.csv')
+summary('Sorted_hotspotData.csv')
