@@ -68,31 +68,40 @@ def summary(file):
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
-    # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
-    occurrencesOne = np.count_nonzero(data == 1)
-    occurrencesTwo = np.count_nonzero(data == 2)
-    occurrencesThree = np.count_nonzero(data == 3)
-    occurrencesFour = np.count_nonzero(data == 4)
-    occurrencesFive = np.count_nonzero(data == 5)
-    occurrencesMore = np.count_nonzero(data > 5)
     
+    # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
+    occurOne = np.count_nonzero(data == 1)
+    occurTwo = np.count_nonzero(data == 2)
+    occurThree = np.count_nonzero(data == 3)
+    occurFour = np.count_nonzero(data == 4)
+    occurFive = np.count_nonzero(data == 5)
+    occurMore = np.count_nonzero(data > 5)
+    numLines = occurOne + occurTwo + occurThree + occurFour + occurFive + occurMore
     print(
-        "1 Witnesses : ", occurrencesOne,"times\n" 
-        "2 Witnesses : ", occurrencesTwo,"times\n"
-        "3 Witnesses : ", occurrencesThree,"times\n"
-        "4 Witnesses : ", occurrencesFour,"times\n"
-        "5 Witnesses : ", occurrencesFive,"times\n"
-        "More than 5 Witnesses :", occurrencesMore, "times"
+        "1 Witnesses : ", occurOne,"times\n" 
+        "2 Witnesses : ", occurTwo,"times\n"
+        "3 Witnesses : ", occurThree,"times\n"
+        "4 Witnesses : ", occurFour,"times\n"
+        "5 Witnesses : ", occurFive,"times\n"
+        "More than 5 Witnesses :", occurMore, "times"
         )
     
-    details(file)
+    new_col_list = ["Challengee"]
+    df2 = pd.read_csv(file, usecols=new_col_list)
+    Challengee = df2
+    usersDf = pd.read_csv(file,  skipfooter= numLines-occurOne, usecols = new_col_list, engine='python')
+    print(df2.values)
+
+    
+    
     
 # Need to print the routers that we are the only one to see 
 def details(file):
     new_col_list = ["Challengee"]
     # df = pd.read_csv(file, usecols=col_list)
+    
     usersDf = pd.read_csv(file,  skipfooter= 60, usecols = new_col_list, engine='python')
-    print( usersDf)
+    print(usersDf.values)
    
 # Update as needed 
 # Change the Network Adderess for different ones
