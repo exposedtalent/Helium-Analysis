@@ -49,12 +49,6 @@ def analyze_hotspot(hotspot, pagecount):
                     # Append all of it to the tableList
                 tableList.append(alltheData)
     return tableList
-
-def sortCSV(file):
-    # after the file is written we need to sort the csv file using pandas library 
-    df = pd.read_csv(file)
-    sorted_df = df.sort_values(by=["Witnesses"], ascending=True)
-    sorted_df.to_csv('Sorted_hotspotData.csv', index=False)
     
 def summary(file):
     # Looks at only the Witnesses col and prints the num of Witnesses 
@@ -68,7 +62,7 @@ def summary(file):
     occurFour = np.count_nonzero(data == 4)
     occurFive = np.count_nonzero(data == 5)
     occurMore = np.count_nonzero(data > 5)
-    numLines = occurOne + occurTwo + occurThree + occurFour + occurFive + occurMore
+
     print(
         "1 Witnesses : ", occurOne,"times\n" 
         "2 Witnesses : ", occurTwo,"times\n"
@@ -88,47 +82,29 @@ def summary(file):
         "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n",
         "Rounter with 5 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values), "\n"
     )
+
 def remove_dup(x):
     tuple_line = [tuple(pt) for pt in x] # convert list of list into list of tuple
     tuple_new_line = sorted(set(tuple_line),key=tuple_line.index) # remove duplicated element
     new_line = [list(t) for t in tuple_new_line] # convert list of tuple into list of list
     return new_line
 
+def sortCSV(file):
+    # after the file is written we need to sort the csv file using pandas library 
+    df = pd.read_csv(file)
+    sorted_df = df.sort_values(by=["Witnesses"], ascending=True)
+    sorted_df.to_csv('Sorted_hotspotData.csv', index=False)
+
         
 hotspots = ['112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
             '112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
             '112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
             '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx' ]
-pageNum = int(input("Enter the page amount to check : "))
 
+pageNum = int(input("Enter the page amount to check : "))
 for i in range(len(hotspots)):
     data = analyze_hotspot(hotspots[i], pageNum)
     df = pd.DataFrame(data)
     df.to_csv('hotspotData.csv')
     sortCSV('hotspotData.csv')
     summary('Sorted_hotspotData.csv')
-# pageNum = int(input("Enter the page amount to check : "))
-# print("==================== "+"Clever Ivory Raccoon"+ " =====================\n")
-# data = analyze_hotspot(hs_mg, pageNum)
-# df = pd.DataFrame(data)
-# df.to_csv('hotspotData.csv')
-# sortCSV('hotspotData.csv')
-# summary('Sorted_hotspotData.csv')
-# print ("==================== "+ "Brilliant Latte Bear" + "===================\n")
-# data = analyze_hotspot(hs_ag, pageNum)
-# df = pd.DataFrame(data)
-# df.to_csv('hotspotData.csv')
-# sortCSV('hotspotData.csv')
-# summary('Sorted_hotspotData.csv')
-# print ("==================== "+ "Silly Aqua Carp" + "=========================\n")
-# data = analyze_hotspot(hs_jh, pageNum)
-# df = pd.DataFrame(data)
-# df.to_csv('hotspotData.csv')
-# sortCSV('hotspotData.csv')
-# summary('Sorted_hotspotData.csv')
-# print ("==================== "+ "Fluffy Taupe Aphid" + "======================\n")
-# data = analyze_hotspot(hs_jc, pageNum)
-# df = pd.DataFrame(data)
-# df.to_csv('hotspotData.csv')
-# sortCSV('hotspotData.csv')
-# summary('Sorted_hotspotData.csv')
