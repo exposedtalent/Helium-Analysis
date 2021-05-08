@@ -40,7 +40,7 @@ hs_ag='112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc'
 hs_jh='112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd'
 hs_jc='112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx'
 
-print("==================== "+ hs_mg + "===============")
+print("==================== "+ hs_mg + " ====================")
 analyze_hotspot(hs_mg, 2)
 #print "==================== "+ hs_ag + "==============="
 #analyze_hotspot(hs_ag)
