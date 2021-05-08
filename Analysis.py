@@ -17,7 +17,7 @@ import numpy as np
 
 def analyze_hotspot(hotspot, pagecount):
     
-    output = {}
+    output={"data": []}    
     base_url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
     url = base_url
     tableList = []
@@ -25,9 +25,8 @@ def analyze_hotspot(hotspot, pagecount):
     while pagecount:
         response = requests.get(url)
         new_data = response.json()
-        new_output = output | new_data
-        output.update(new_output)
-        cursor = new_data['cursor']
+        output['data'].extend(new_data['data']) 
+        cursor=new_data['cursor']
         url=base_url+'?cursor='+cursor
         pagecount -= 1
         # For loop to parse the data coming from the json file
@@ -39,7 +38,6 @@ def analyze_hotspot(hotspot, pagecount):
             city = i['path'][0]['geocode']['short_city']
             witnesses = len(i['path'][0]['witnesses'])
                 # Create a dict of the data
-            print(timestamp,challengee,street,city,witnesses)
             if(witnesses != 0):
                 alltheData = {
                     'TimeStamp' : timestamp,
@@ -49,7 +47,7 @@ def analyze_hotspot(hotspot, pagecount):
                     'Witnesses' : witnesses
                 }
                     # Append all of it to the tableList
-            tableList.append(alltheData)
+                tableList.append(alltheData)
     return tableList
 
 def sortCSV(file):
@@ -63,9 +61,6 @@ def summary(file):
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
-    
-    
-    
     # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
     occurOne = np.count_nonzero(data == 1)
     occurTwo = np.count_nonzero(data == 2)
@@ -89,12 +84,14 @@ def summary(file):
     # This prints the rounter when we are the only one witnessing 
     usersDf = pd.read_csv(file,  skipfooter= numLines-occurOne, usecols = new_col_list, engine='python')
     remove_dup = np.unique(usersDf).tolist()    # Removes the duplicates
-    print("Rounter with 1 witnesses :\n", remove_dup, "\n")
-    print("Rounters with 1 witnesses :\n", Challengee[0:occurOne].values)
-    print("Rounters with 2 witnesses :\n", Challengee[occurOne:occurOne+occurTwo].values)
-    print("Rounter with 3 witnesses :\n", Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values)
-    print("Rounter with 4 witnesses :\n", Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values)
-    print("Rounter with 5 witnesses :\n", Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values)
+    print(
+        "Rounter with 1 witnesses :\n", remove_dup, "\n",
+        "Rounters with 1 witnesses :\n", Challengee[0:occurOne].values, "\n",
+        "Rounters with 2 witnesses :\n", Challengee[occurOne:occurOne+occurTwo].values, "\n",
+        "Rounter with 3 witnesses :\n", Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values, "\n",
+        "Rounter with 4 witnesses :\n", Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values, "\n",
+        "Rounter with 5 witnesses :\n", Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values
+    )
 
         
 hs_mg='112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg'
