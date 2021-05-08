@@ -84,9 +84,9 @@ def summary(file):
     )
 
 def remove_dup(x):
-    tuple_line = [tuple(pt) for pt in x] # convert list of list into list of tuple
-    tuple_new_line = sorted(set(tuple_line),key=tuple_line.index) # remove duplicated element
-    new_line = [list(t) for t in tuple_new_line] # convert list of tuple into list of list
+    tuple_line = [tuple(pt) for pt in x]                            # convert list of list into list of tuple
+    tuple_new_line = sorted(set(tuple_line),key=tuple_line.index)   # remove duplicated element
+    new_line = [list(t) for t in tuple_new_line]                    # convert list of tuple into list of list
     return new_line
 
 def sortCSV(file):
