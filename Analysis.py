@@ -11,14 +11,12 @@ import pprint
 import pandas as pd
 import csv
 import numpy as np
-
+tableList = []
 def analyze_hotspot(hotspot, pagecount):
     
     output={"data": []}    
     base_url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
     url = base_url
-    tableList = []
-    
     # While loop to go thrrough the num of pages specified by the user and get all the data from the Helium api
     while pagecount:
         response = requests.get(url)
@@ -36,6 +34,7 @@ def analyze_hotspot(hotspot, pagecount):
             street = i['path'][0]['geocode']['short_street']
             city = i['path'][0]['geocode']['short_city']
             witnesses = len(i['path'][0]['witnesses'])
+            
             # Create a dict of the data
             if(witnesses != 0):
                 alltheData = {
@@ -48,7 +47,20 @@ def analyze_hotspot(hotspot, pagecount):
                 # Append all of it to the tableList
                 tableList.append(alltheData)
     return tableList
+def reward_scale(file):
+    data = {}
+    col_list = ["Challengee"]
+    df = pd.read_csv(file, usecols=col_list)
+    hotspot = df.values 
+    flat_list = list(np.concatenate(hotspot).flat)   
     
+    for k in range(len(flat_list)):
+        base_url='https://api.helium.io/v1/hotspots/' + flat_list[k] +  '/'
+        #print(base_url)
+        response = requests.get(base_url)
+        data = response.json()
+        #print(data)
+  
 def summary(file):
     # Looks at only the Witnesses col and prints the num of Witnesses 
     col_list = ["Witnesses"]
@@ -99,8 +111,8 @@ def sortCSV(file):
 
         
 hotspots = ['112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
-            '112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
-            '112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
+            #'112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
+            #'112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
             '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx' ]
 
 pageNum = int(input("Enter the page amount to check : "))
@@ -108,5 +120,6 @@ for i in range(len(hotspots)):
     data = analyze_hotspot(hotspots[i], pageNum)
     df = pd.DataFrame(data)
     df.to_csv('hotspotData.csv')
+    reward_scale('hotspotData.csv')
     sortCSV('hotspotData.csv')
     summary('Sorted_hotspotData.csv')
