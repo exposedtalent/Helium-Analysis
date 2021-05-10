@@ -48,19 +48,25 @@ def analyze_hotspot(hotspot, pagecount):
                 tableList.append(alltheData)
     return tableList
 def reward_scale(file):
-    data = {}
+    output={"data": []} 
     col_list = ["Challengee"]
     df = pd.read_csv(file, usecols=col_list)
     hotspot = df.values 
     flat_list = list(np.concatenate(hotspot).flat)   
     
-    for k in range(len(flat_list)):
-        base_url='https://api.helium.io/v1/hotspots/' + flat_list[k] +  '/'
-        #print(base_url)
+    for i in range(len(flat_list)):
+        base_url='https://api.helium.io/v1/hotspots/' + flat_list[i] +  '/'
         response = requests.get(base_url)
-        data = response.json()
-        #print(data)
-  
+        new_data = response.json()
+        output['data'].extend(new_data['data']) 
+    
+    print(output)
+    # for i in output['data']:
+    #     rewardScale = [0]['reward_scale']
+    #     print(rewardScale)
+        
+        
+        
 def summary(file):
     # Looks at only the Witnesses col and prints the num of Witnesses 
     col_list = ["Witnesses"]
