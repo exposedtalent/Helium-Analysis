@@ -12,13 +12,15 @@ import pandas as pd
 import csv
 import numpy as np
 
+# Function to get the reward scale of each of the challengee of the witnesses
 def get_reward_scale(challengee):
     base_url='https://api.helium.io/v1/hotspots/' + challengee
     response = requests.get(base_url)
     new_data = response.json()
     reward_scale = new_data['data']['reward_scale']
     return reward_scale
- 
+
+# Function to analyzer the data from the activity tab of the Helium API 
 def analyze_hotspot(hotspot, pagecount):
     tableList = []
     output={"data": []}    
@@ -58,10 +60,7 @@ def analyze_hotspot(hotspot, pagecount):
                 tableList.append(alltheData)
     return tableList
 
-
-
-        
-        
+# Function for to print the small and detailed summary of the parsed data 
 def summary(file):
     # Looks at only the Witnesses col and prints the num of Witnesses 
     col_list = ["Witnesses"]
@@ -101,20 +100,23 @@ def summary(file):
     #     "Rounter with 5 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values), "\n"
     # )
 
+# Function to remove the duplicates in the hotspots name 
 def remove_dup(x):
     tuple_line = [tuple(pt) for pt in x]                            # convert list of list into list of tuple
     tuple_new_line = sorted(set(tuple_line),key=tuple_line.index)   # remove duplicated element
     new_line = [list(t) for t in tuple_new_line]                    # convert list of tuple into list of list
     return new_line
 
+# Function to sort the CSV file to be asending order for the # of Witnesses
 def sortCSV(file):
     # after the file is written we need to sort the csv file using pandas library 
     df = pd.read_csv(file)
     sorted_df = df.sort_values(by=["Witnesses"], ascending=True)
     sorted_df.to_csv('Sorted_hotspotData.csv', index=False)
 
-        
-hotspots = [#'112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
+# List of the hotspots names       
+hotspots = [
+            #'112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
             #'112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
             #'112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
             # '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
@@ -125,12 +127,11 @@ hotspots = [#'112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
             '111MtVFr98Qs7Bs1u6CaVQFF2CjqJ83sLfxP1BPsAyR5h4Qa77A'
             
             ]
-
+# This is the main program
 pageNum = int(input("Enter the page amount to check : "))
 for i in range(len(hotspots)):
     data = analyze_hotspot(hotspots[i], pageNum)
     df = pd.DataFrame(data)
     df.to_csv('hotspotData.csv')
-    #reward_scale('hotspotData.csv')
     sortCSV('hotspotData.csv')
     summary('Sorted_hotspotData.csv')
