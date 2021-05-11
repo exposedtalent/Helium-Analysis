@@ -67,8 +67,13 @@ def summary(file):
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
     
+    col_list2 = ["reward_scale"]
+    df2 = pd.read_csv(file, usecols=col_list2)
+    rewardScale = df2.values
+    flat_list = list(np.concatenate(rewardScale).flat)
+    avg = sum(flat_list)/ len(flat_list)
     # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
-    occurOne = np.count_nonzero(data == 1)
+    occurOne = np.count_nonzero(data == 1)  
     occurTwo = np.count_nonzero(data == 2)
     occurThree = np.count_nonzero(data == 3)
     occurFour = np.count_nonzero(data == 4)
@@ -82,23 +87,24 @@ def summary(file):
         "3 Witnesses : ", occurThree,"times\n"
         "4 Witnesses : ", occurFour,"times\n"
         "5 Witnesses : ", occurFive,"times\n"
-        "More than 5 Witnesses :", occurMore, "times\n"
+        "More than 5 Witnesses :", occurMore, "times\n\n"
         "Total Witnesses from 1-5 : ", onetofive, "times\n"
-        "Total Witnesses : ", onetofive + occurMore, "\n\n"
+        "Total Witnesses : ", onetofive + occurMore, "\n"
+        "Average Reward Scale : ", round(avg,3), "\n\n"
         )
     # Detailed summary 
     new_col_list = ["Challengee"]
     df2 = pd.read_csv(file, usecols=new_col_list)
     Challengee = df2
     
-    # print(
-    #     "========================= Names of the Hotspots =========================\n "
-    #     "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n"
-    #     "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n",
-    #     "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n",
-    #     "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n",
-    #     "Rounter with 5 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values), "\n"
-    # )
+    print(
+        "========================= Names of the Hotspots =========================\n "
+        "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n"
+        "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n",
+        "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n",
+        "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n",
+        "Rounter with 5 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values), "\n"
+    )
 
 # Function to remove the duplicates in the hotspots name 
 def remove_dup(x):
