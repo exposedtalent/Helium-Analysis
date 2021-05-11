@@ -11,9 +11,16 @@ import pprint
 import pandas as pd
 import csv
 import numpy as np
-tableList = []
+
+def get_reward_scale(challengee):
+    base_url='https://api.helium.io/v1/hotspots/' + challengee
+    response = requests.get(base_url)
+    new_data = response.json()
+    reward_scale = new_data['data']['reward_scale']
+    return reward_scale
+ 
 def analyze_hotspot(hotspot, pagecount):
-    
+    tableList = []
     output={"data": []}    
     base_url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
     url = base_url
@@ -25,12 +32,14 @@ def analyze_hotspot(hotspot, pagecount):
         cursor=new_data['cursor']
         url=base_url+'?cursor='+cursor
         pagecount -= 1
-        
+    
         # For loop to parse the data coming from the json file
     for i in output['data']:
         if (i['type'] == "poc_receipts_v1") and (i['path'][0]['challengee'] != hotspot):
             timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d-%I:%M:%S")
             challengee = i['path'][0]['challengee']
+            # Get the reward scale of the challengee
+            reward_scale = get_reward_scale(challengee)
             street = i['path'][0]['geocode']['short_street']
             city = i['path'][0]['geocode']['short_city']
             witnesses = len(i['path'][0]['witnesses'])
@@ -40,6 +49,7 @@ def analyze_hotspot(hotspot, pagecount):
                 alltheData = {
                     'TimeStamp' : timestamp,
                     'Challengee' : challengee,
+                    'reward_scale': reward_scale,
                     'Street'    : street,
                     'City'      : city,
                     'Witnesses' : witnesses
@@ -47,24 +57,9 @@ def analyze_hotspot(hotspot, pagecount):
                 # Append all of it to the tableList
                 tableList.append(alltheData)
     return tableList
-def reward_scale(file):
-    output={"data": []} 
-    col_list = ["Challengee"]
-    df = pd.read_csv(file, usecols=col_list)
-    hotspot = df.values 
-    flat_list = list(np.concatenate(hotspot).flat)   
-    
-    for i in range(len(flat_list)):
-        base_url='https://api.helium.io/v1/hotspots/' + flat_list[i] +  '/'
-        response = requests.get(base_url)
-        new_data = response.json()
-        output['data'].extend(new_data['data']) 
-    
-    print(output)
-    # for i in output['data']:
-    #     rewardScale = [0]['reward_scale']
-    #     print(rewardScale)
-        
+
+
+
         
         
 def summary(file):
@@ -80,6 +75,7 @@ def summary(file):
     occurFour = np.count_nonzero(data == 4)
     occurFive = np.count_nonzero(data == 5)
     occurMore = np.count_nonzero(data > 5)
+    onetofive = occurOne + occurTwo + occurThree + occurFour + occurFive
 
     print(
         "1 Witnesses : ", occurOne,"times\n" 
@@ -88,20 +84,22 @@ def summary(file):
         "4 Witnesses : ", occurFour,"times\n"
         "5 Witnesses : ", occurFive,"times\n"
         "More than 5 Witnesses :", occurMore, "times\n"
+        "Total Witnesses from 1-5 : ", onetofive, "times\n"
+        "Total Witnesses : ", onetofive + occurMore, "\n\n"
         )
     # Detailed summary 
     new_col_list = ["Challengee"]
     df2 = pd.read_csv(file, usecols=new_col_list)
     Challengee = df2
     
-    print(
-        "========================= Names of the Hotspots =========================\n "
-        "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n"
-        "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n",
-        "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n",
-        "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n",
-        "Rounter with 5 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values), "\n"
-    )
+    # print(
+    #     "========================= Names of the Hotspots =========================\n "
+    #     "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n"
+    #     "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n",
+    #     "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n",
+    #     "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n",
+    #     "Rounter with 5 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree+occurFour:occurOne+occurTwo+occurThree+occurFour+occurFive].values), "\n"
+    # )
 
 def remove_dup(x):
     tuple_line = [tuple(pt) for pt in x]                            # convert list of list into list of tuple
@@ -116,16 +114,23 @@ def sortCSV(file):
     sorted_df.to_csv('Sorted_hotspotData.csv', index=False)
 
         
-hotspots = ['112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
+hotspots = [#'112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
             #'112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
             #'112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
-            '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx' ]
+            # '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
+            
+            # '11H8cjxUtx9WzCxPkbVq3AKzSYh7Wo5yWnPXLrf8eygiKt6hHVP',
+            # '11c4pxUfwby5rtz2PtRm4oxmndc8WAcQg5BxT7CNpU56hHqvp9h',
+            # '112KHUoQtauKc7hx2yDceHV1Q2X9DsCtdMeoK28gZMPJvHHLrAQz',
+            '111MtVFr98Qs7Bs1u6CaVQFF2CjqJ83sLfxP1BPsAyR5h4Qa77A'
+            
+            ]
 
 pageNum = int(input("Enter the page amount to check : "))
 for i in range(len(hotspots)):
     data = analyze_hotspot(hotspots[i], pageNum)
     df = pd.DataFrame(data)
     df.to_csv('hotspotData.csv')
-    reward_scale('hotspotData.csv')
+    #reward_scale('hotspotData.csv')
     sortCSV('hotspotData.csv')
     summary('Sorted_hotspotData.csv')
