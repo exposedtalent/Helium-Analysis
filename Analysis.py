@@ -34,7 +34,6 @@ def analyze_hotspot(hotspot, pagecount):
         cursor=new_data['cursor']
         url=base_url+'?cursor='+cursor
         pagecount -= 1
-    
         # For loop to parse the data coming from the json file
     for i in output['data']:
         if (i['type'] == "poc_receipts_v1") and (i['path'][0]['challengee'] != hotspot):
@@ -66,18 +65,18 @@ def summary(file):
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
+    
     # Looks at only the Reward Scale col and store it in a list
     col_list2 = ["reward_scale"]
     df2 = pd.read_csv(file, usecols=col_list2)
     rewardScale = df2.values
     rs = list(np.concatenate(rewardScale).flat)
-
+    
     # Looks at only the Challengee col and store it in a list
     new_col3 = ["Challengee"]
-    df2 = pd.read_csv(file, usecols=new_col3)
-    Challengee = df2.values
+    df3 = pd.read_csv(file, usecols=new_col3)
+    Challengee = df3
 
-    
     # using the numpy lib we find the number of times this router has seen 1,2,3,4,5 or more witnesses for a challenge
     occurOne = np.count_nonzero(data == 1)  
     occurTwo = np.count_nonzero(data == 2)
@@ -95,7 +94,6 @@ def summary(file):
         "Total Witnesses from 1-5 : ", onetofour, "\n",
         "Total Witnesses : ", onetofour + occurMore, "\n",
         )
-    
     
     print(
         "========================= Names of the Hotspots =========================\n "
@@ -118,7 +116,8 @@ def sortCSV(file):
     df = pd.read_csv(file)
     sorted_df = df.sort_values(by=["Witnesses"], ascending=True)
     sorted_df.to_csv('Sorted_hotspotData.csv', index=False)
-    
+
+# Function to return avg of the list   
 def avg(rs):
     return sum(rs) / len(rs)
 
@@ -127,7 +126,7 @@ hotspots = [
              '112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
             # '112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
             # '112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
-            #'112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
+            '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
             
             # '11H8cjxUtx9WzCxPkbVq3AKzSYh7Wo5yWnPXLrf8eygiKt6hHVP',
             # '11c4pxUfwby5rtz2PtRm4oxmndc8WAcQg5BxT7CNpU56hHqvp9h',
