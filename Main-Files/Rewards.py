@@ -2,10 +2,7 @@
 # need host name, adreres  of the hotspot, name of th hotspot into a cvs 
 # cognito for aws
 import requests
-import json
-import datetime
 import pandas as pd
-import csv
 import numpy as np
 
 # Function to get the rewards for the hotspots 
