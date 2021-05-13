@@ -7,6 +7,7 @@ from datetime import date,timedelta
 import pandas as pd
 import csv
 import numpy as np
+
 # Function to get the rewards for the hotspots 
 def get_rewards(hotspotList, minDate, maxDate):
     rewardList = []
@@ -17,6 +18,7 @@ def get_rewards(hotspotList, minDate, maxDate):
         rewards = new_data['data']['total']
         rewardList.append(rewards)
     return rewardList
+
 # Function to print out the result
 def result(rewardList, hotspot) : 
     # Get the Host name in a list
@@ -24,11 +26,13 @@ def result(rewardList, hotspot) :
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
     hostName = list(np.concatenate(data).flat)
+    
     # Get the Hotspot Name in a list
     col_list2 = ["Hotspot Name"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list2)
     data = df.values
     hotspotName = list(np.concatenate(data).flat)
+    
     # For loop to print
     for i in range(len(hotspot)):
         print(
@@ -38,6 +42,7 @@ def result(rewardList, hotspot) :
             "Rewards "  ,round(rewardList[i], 3), "\n"
         )
     print(" Reward Total: ", round(sum(rewardList)),3, "\n")
+    
 # Main Function
 def main():
     # This is to figure out the time
@@ -45,11 +50,13 @@ def main():
     maxDate = today.strftime("%Y-%m-%d")
     sevenDay = today - timedelta(7)
     thirtyDays = today - timedelta(30)
+    
     # This is for getting the Hotspot Addr fromt the csv file
     col_list = ["Hopstop Addr"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
     addr = list(np.concatenate(data).flat)
+    
     # For loop to call the get_rewards function
     print("=================== 7 DAY ===================")
     rewardList = get_rewards(addr, str(sevenDay), maxDate )
