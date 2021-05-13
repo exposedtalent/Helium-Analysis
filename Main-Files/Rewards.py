@@ -3,16 +3,16 @@
 # cognito for aws
 import requests
 import json
-from datetime import date,timedelta
+import datetime
 import pandas as pd
 import csv
 import numpy as np
 
 # Function to get the rewards for the hotspots 
-def get_rewards(hotspotList, minDate, maxDate):
+def get_rewards(hotspotList, minDate):
     rewardList = []
     for i in range(len(hotspotList)):
-        url='https://api.helium.io/v1/hotspots/' + hotspotList[i] + '/rewards/sum' + '?min_time=' + minDate + '&max_time=' + maxDate
+        url='https://api.helium.io/v1/hotspots/' + hotspotList[i] + '/rewards/sum?min_time=' + minDate
         response = requests.get(url)
         new_data = response.json()
         rewards = new_data['data']['total']
@@ -27,7 +27,7 @@ def get_balance(addrList):
         new_data = response.json()
         balance = new_data['data']['last_day'][0]['balance']
         balanceList.append(balance)
-    print("Total Balance : ", round(sum(balanceList) / 100000000, 3))
+    print("Total Balance : ", round(sum(balanceList) / 100000000, 2))
     
 # Function to print out the result
 def result(rewardList, hotspot) : 
@@ -49,18 +49,19 @@ def result(rewardList, hotspot) :
             " Host Name : ", hostName[i], "\n",
             "Hotspot Addr : ", hotspot[i], "\n",
             "Hotspot Name : " , hotspotName[i], "\n",
-            "Rewards "  ,round(rewardList[i], 3), "\n"
+            "Rewards "  ,round(rewardList[i], 2), "\n"
         )
-    print(" Reward Total: ", round(sum(rewardList),3), "\n")
+    print(" Reward Total: ", round(sum(rewardList),2), "\n")
     
 # Main Function
 def main():
     # This is to figure out the time
-    today = date.today()
-    maxDate = today.strftime("%Y-%m-%d")
-    Day = today - timedelta(1)
-    thirtyDays = today - timedelta(30)
-    
+    today = datetime.datetime.strftime(datetime.datetime.today() , '%Y-%m-%dT%I:%M:%SZ')    
+    #2020-08-27T00:00:00Z
+    # min_time=-4%20week
+    twentyfourHour = '-24%20hour'
+    thirtyDays = '-4%20week'
+
     # This is for getting the Hotspot Addr fromt the csv file
     col_list = ["Hopstop Addr"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
@@ -72,12 +73,13 @@ def main():
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
     balanceList = list(np.concatenate(data).flat)
+   
     # For loop to call the get_rewards function
     print("=================== 24 Hours ===================")
-    rewardList = get_rewards(addr, str(Day), maxDate )
+    rewardList = get_rewards(addr, twentyfourHour )
     result(rewardList,addr)
     print("=================== 30 DAY ===================")
-    rewardList = get_rewards(addr, str(thirtyDays), maxDate )
+    rewardList = get_rewards(addr, thirtyDays )
     result(rewardList,addr)
     print("=================== Total Balance ===================")
     get_balance(balanceList)
