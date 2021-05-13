@@ -19,6 +19,16 @@ def get_rewards(hotspotList, minDate, maxDate):
         rewardList.append(rewards)
     return rewardList
 
+def get_balance(addrList):
+    balanceList = []
+    for i in range(len(addrList)):
+        url='https://api.helium.io/v1/accounts/' + addrList[i] + '/stats'
+        response = requests.get(url)
+        new_data = response.json()
+        balance = new_data['data']['last_day'][0]['balance']
+        balanceList.append(balance)
+    print("Total Balance : ", round(sum(balanceList) / 100000000, 3))
+    
 # Function to print out the result
 def result(rewardList, hotspot) : 
     # Get the Host name in a list
@@ -41,14 +51,14 @@ def result(rewardList, hotspot) :
             "Hotspot Name : " , hotspotName[i], "\n",
             "Rewards "  ,round(rewardList[i], 3), "\n"
         )
-    print(" Reward Total: ", round(sum(rewardList)),3, "\n")
+    print(" Reward Total: ", round(sum(rewardList),3), "\n")
     
 # Main Function
 def main():
     # This is to figure out the time
     today = date.today()
     maxDate = today.strftime("%Y-%m-%d")
-    sevenDay = today - timedelta(7)
+    Day = today - timedelta(1)
     thirtyDays = today - timedelta(30)
     
     # This is for getting the Hotspot Addr fromt the csv file
@@ -57,13 +67,20 @@ def main():
     data = df.values
     addr = list(np.concatenate(data).flat)
     
+    # This is for getting the Hotspot Addr fromt the csv file
+    col_list = ["Account Addr"]
+    df = pd.read_csv('HeliumData.csv', usecols=col_list)
+    data = df.values
+    balanceList = list(np.concatenate(data).flat)
     # For loop to call the get_rewards function
-    print("=================== 7 DAY ===================")
-    rewardList = get_rewards(addr, str(sevenDay), maxDate )
+    print("=================== 24 Hours ===================")
+    rewardList = get_rewards(addr, str(Day), maxDate )
     result(rewardList,addr)
     print("=================== 30 DAY ===================")
     rewardList = get_rewards(addr, str(thirtyDays), maxDate )
     result(rewardList,addr)
+    print("=================== Total Balance ===================")
+    get_balance(balanceList)
 
 if __name__ == "__main__":
     main()
