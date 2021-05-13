@@ -12,8 +12,6 @@ import pandas as pd
 import csv
 import numpy as np
 
-
-
 # Function to analyzer the data from the activity tab of the Helium API 
 def analyze_hotspot(hotspot, pagecount):
     tableList = []
@@ -37,7 +35,6 @@ def analyze_hotspot(hotspot, pagecount):
             street = i['path'][0]['geocode']['short_street']
             city = i['path'][0]['geocode']['short_city']
             witnesses = len(i['path'][0]['witnesses'])
-            
             # Create a dict of the data
             if(witnesses != 0):
                 alltheData = {
