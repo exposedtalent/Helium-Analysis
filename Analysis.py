@@ -21,7 +21,7 @@ def get_reward_scale(challengee):
     return reward_scale
 
 # Function to analyzer the data from the activity tab of the Helium API 
-def analyze_hotspot(hotspot, pagecount):
+def analyze_hotspot(hotspot, pagecount, rewardScale):
     tableList = []
     output={"data": []}    
     base_url='https://api.helium.io/v1/hotspots/' + hotspot + '/activity'
@@ -40,17 +40,26 @@ def analyze_hotspot(hotspot, pagecount):
             timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d-%I:%M:%S")
             challengee = i['path'][0]['challengee']
             # Get the reward scale of the challengee
-            reward_scale = get_reward_scale(challengee)
+            if rewardScale:
+                reward_scale = get_reward_scale(challengee)
             street = i['path'][0]['geocode']['short_street']
             city = i['path'][0]['geocode']['short_city']
             witnesses = len(i['path'][0]['witnesses'])
             
             # Create a dict of the data
-            if(witnesses != 0):
+            if(witnesses != 0 and rewardScale):
                 alltheData = {
                     'TimeStamp' : timestamp,
                     'Challengee' : challengee,
                     'reward_scale': reward_scale,
+                    'Street'    : street,
+                    'City'      : city,
+                    'Witnesses' : witnesses
+                }
+            if(witnesses != 0):
+                alltheData = {
+                    'TimeStamp' : timestamp,
+                    'Challengee' : challengee,
                     'Street'    : street,
                     'City'      : city,
                     'Witnesses' : witnesses
@@ -60,18 +69,19 @@ def analyze_hotspot(hotspot, pagecount):
     return tableList
 
 # Function for to print the small and detailed summary of the parsed data 
-def summary(file):
+def summary(file,rewardScale):
     # Looks at only the Witnesses col and prints the num of Witnesses 
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
     data = df.values
     
-    # Looks at only the Reward Scale col and store it in a list
-    col_list2 = ["reward_scale"]
-    df2 = pd.read_csv(file, usecols=col_list2)
-    rewardScale = df2.values
-    rs = list(np.concatenate(rewardScale).flat)
-    
+    if rewardScale:
+        # Looks at only the Reward Scale col and store it in a list
+        col_list2 = ["reward_scale"]
+        df2 = pd.read_csv(file, usecols=col_list2)
+        rewardScale = df2.values
+        rs = list(np.concatenate(rewardScale).flat)
+        
     # Looks at only the Challengee col and store it in a list
     new_col3 = ["Challengee"]
     df3 = pd.read_csv(file, usecols=new_col3)
@@ -84,23 +94,35 @@ def summary(file):
     occurFour = np.count_nonzero(data == 4)
     occurMore = np.count_nonzero(data >= 5)
     onetofour = occurOne + occurTwo + occurThree + occurFour 
-
-    print(
-        "1 Witnesses : ", occurOne, "\tAVG Reward Scale :", round(avg(rs[0:occurOne]),3),"\n", 
-        "2 Witnesses : ", occurTwo, "\tAVG Reward Scale :", round(avg(rs[occurOne:occurOne+occurTwo]),3),"\n",
-        "3 Witnesses : ", occurThree, "\tAVG Reward Scale :", round(avg(rs[occurOne+occurTwo:occurOne+occurTwo+occurThree]),3),"\n",
-        "4 Witnesses : ", occurFour, "\tAVG Reward Scale :", round(avg(rs[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour]),3),"\n",
-        "More than 5 Witnesses :", occurMore, "\n\n",
-        "Total Witnesses from 1-5 : ", onetofour, "\n",
-        "Total Witnesses : ", onetofour + occurMore, "\n",
-        )
+    if rewardScale:
+        print(
+            "============= Witnesses =============\n"
+            " 1 Witnesses : ", occurOne, "\tAVG Reward Scale :", round(avg(rs[0:occurOne]),3),"\n", 
+            "2 Witnesses : ", occurTwo, "\tAVG Reward Scale :", round(avg(rs[occurOne:occurOne+occurTwo]),3),"\n",
+            "3 Witnesses : ", occurThree, "\tAVG Reward Scale :", round(avg(rs[occurOne+occurTwo:occurOne+occurTwo+occurThree]),3),"\n",
+            "4 Witnesses : ", occurFour, "\tAVG Reward Scale :", round(avg(rs[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour]),3),"\n",
+            "More than 5 Witnesses :", occurMore, "\n\n",
+            "Total Witnesses from 1-4 : ", onetofour, "\n",
+            "Total Witnesses : ", onetofour + occurMore, "\n",
+            )
+    else :
+        print(
+            "============= Witnesses =============\n"
+            " 1 Witnesses : ", occurOne,"\n", 
+            "2 Witnesses : ", occurTwo, "\n",
+            "3 Witnesses : ", occurThree, "\n",
+            "4 Witnesses : ", occurFour, "\n",
+            "More than 5 Witnesses :", occurMore, "\n\n",
+            "Total Witnesses from 1-4 : ", onetofour, "\n",
+            "Total Witnesses : ", onetofour + occurMore, "\n",
+            )
     
     print(
         "========================= Names of the Hotspots =========================\n "
-        "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n"
-        "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n",
-        "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n",
-        "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n",
+        "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n\n"
+        "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n\n",
+        "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n\n",
+        "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n\n\n",
     )
 
 # Function to remove the duplicates in the hotspots name 
@@ -137,12 +159,15 @@ def main():
                 ]
     # This is the main program
     pageNum = int(input("Enter the page amount to check : "))
+    # Turn True for for to print the avg reward scale 
+    # WARNING : ADDS A LOT MORE TIME TO EXECUTE
+    rewardScale = False
     for i in range(len(hotspots)):
-        data = analyze_hotspot(hotspots[i], pageNum)
+        data = analyze_hotspot(hotspots[i], pageNum, rewardScale)
         df = pd.DataFrame(data)
         df.to_csv('hotspotData.csv')
         sortCSV('hotspotData.csv')
-        summary('Sorted_hotspotData.csv')
+        summary('Sorted_hotspotData.csv', rewardScale)
 
 if __name__ == "__main__":
     main()
