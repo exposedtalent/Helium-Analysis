@@ -56,11 +56,8 @@ def result(rewardList, hotspot) :
 # Main Function
 def main():
     # This is to figure out the time
-    today = datetime.datetime.strftime(datetime.datetime.today() , '%Y-%m-%dT%I:%M:%SZ')    
-    #2020-08-27T00:00:00Z
-    # min_time=-4%20week
     twentyfourHour = '-24%20hour'
-    thirtyDays = '-4%20week'
+    thirtyDays = '-30%20day'
 
     # This is for getting the Hotspot Addr fromt the csv file
     col_list = ["Hopstop Addr"]
