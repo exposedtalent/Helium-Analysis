@@ -5,11 +5,8 @@
 
 # Imports
 import requests
-import json
 from datetime import datetime
-import pprint
 import pandas as pd
-import csv
 import numpy as np
 
 # Function to get the reward scale of each of the challengee of the witnesses
