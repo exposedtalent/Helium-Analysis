@@ -48,35 +48,34 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     # Calculations
     bal = sum(balanceList) / 100000000
     usdBal = bal * price
-    print(len(hotspot))
     for i in range(len(hotspot)):
         # Put eveything into a dict
         rewardDict = {
             'Hotspot Owner' : hostName[i],
             'Hotspot Address' : hotspot[i],
             'Hotspot Name' : hotspotName[i],
-            'Hotspot 24 hrs reward' : round(total24hrs[i], 2),
-            'Hotspot 24 hrs USD' : round(total24hrs[i] * price, 2),
-            'Hotspot 30 day reward' : round(total30days[i], 2),
-            'Hotspot 30 day USD' : round(total30days[i] * price,2),
+            'Hotspot 24H HNT' : round(total24hrs[i], 2),
+            'Hotspot 24H USD' : round(total24hrs[i] * price, 2),
+            'Hotspot 30D HNT' : round(total30days[i], 2),
+            'Hotspot 30D USD' : round(total30days[i] * price,2),
             'Wallet Balance' : round(balanceList[i] / 100000000 , 2),
-            'Wallet Balance in USD' : round((balanceList[i] / 100000000) * price , 2),
+            'Wallet Balance USD' : round((balanceList[i] / 100000000) * price , 2),
             
         }
         rewardList.append(rewardDict)
     
     balanceDict = {
-        'Hotspot 24hrs Total' : round(sum(total24hrs),2),
-        'Hotspot 24 hrs USD' : round(sum(total24hrs) * price,2),
-        'Hotspot 30 day Total' : round(sum(total30days),2),
-        'Hotspot 30 day USD' : round(sum(total30days) * price,2),
-        'Total Balance' : round(bal,2),
-        'Total Balance in USD' : round(usdBal, 2),
+        'Hotspots 24H HNT' : round(sum(total24hrs),2),
+        'Hotspots 24H USD' : round(sum(total24hrs) * price,2),
+        'Hotspots 30D HNT' : round(sum(total30days),2),
+        'Hotspots 30D USD' : round(sum(total30days) * price,2),
+        'Total HNT' : round(bal,2),
+        'Total USD' : round(usdBal, 2),
         
     }
     dataDict = {
             'Balance' : balanceDict,
-            'Hotspot' : rewardList
+            'Hotspots' : rewardList
         }
     return dataDict
             
