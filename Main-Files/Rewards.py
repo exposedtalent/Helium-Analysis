@@ -8,33 +8,27 @@ import json
 
 rewardList = []
 # Function to get the rewards for the hotspots 
-def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName):
-    # URL for the 24 hours
-    url='https://api.helium.io/v1/hotspots/' + hotspot + '/rewards/sum?min_time=' + twentyfourHour
-    response = requests.get(url)
-    new_data = response.json()
-    reward24hrs = new_data['data']['total']
+def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr):
+    total24hrs = []
+    total30days = []
+    for i in range(len(hotspot)):
+        # URL for the 24 hours
+        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour
+        response = requests.get(url)
+        new_data = response.json()
+        reward24hrs = new_data['data']['total']
+        total24hrs.append(reward24hrs)
+        
+        # URL for the 30 days 
+        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + thirtyDays
+        response = requests.get(url)
+        new_data = response.json()
+        reward30days = new_data['data']['total']
+        total30days.append(reward30days)
     
-    # URL for the 30 days 
-    url='https://api.helium.io/v1/hotspots/' + hotspot + '/rewards/sum?min_time=' + thirtyDays
-    response = requests.get(url)
-    new_data = response.json()
-    reward30days = new_data['data']['total']
     
-    # Put eveything into a dict
-    rewardDict = {
-        'Hotspot Owner' : hostName,
-        'Hotspot Address' : hotspot,
-        'Hotspot Name' : hotspotName,
-        'Hotspot 24 hrs reward' : round(reward24hrs, 2),
-        'Hotspot 30 day reward' : round(reward30days, 2)
-    }
     # Append the dict into a list
-    rewardList.append(rewardDict)
-    return rewardList
-
-# Function to get tthe total balance of all accounts
-def get_balance(addrList):
+    # Function to get tthe total balance of all accounts
     balanceList = []
     
     # Binance API to get the current rate
@@ -44,8 +38,8 @@ def get_balance(addrList):
     price = float(new_data['price'])
     
     # For loop to get the account balance of the user
-    for i in range(len(addrList)):
-        url='https://api.helium.io/v1/accounts/' + addrList[i] + '/stats'
+    for i in range(len(accAddr)):
+        url='https://api.helium.io/v1/accounts/' + accAddr[i] + '/stats'
         response = requests.get(url)
         new_data = response.json()
         balance = new_data['data']['last_day'][0]['balance']
@@ -54,11 +48,37 @@ def get_balance(addrList):
     # Calculations
     bal = sum(balanceList) / 100000000
     usdBal = bal * price
+    print(len(hotspot))
+    for i in range(len(hotspot)):
+        # Put eveything into a dict
+        rewardDict = {
+            'Hotspot Owner' : hostName[i],
+            'Hotspot Address' : hotspot[i],
+            'Hotspot Name' : hotspotName[i],
+            'Hotspot 24 hrs reward' : round(total24hrs[i], 2),
+            'Hotspot 24 hrs USD' : round(total24hrs[i] * price, 2),
+            'Hotspot 30 day reward' : round(total30days[i], 2),
+            'Hotspot 30 day USD' : round(total30days[i] * price,2),
+            'Wallet Balance' : round(balanceList[i] / 100000000 , 2),
+            'Wallet Balance in USD' : round((balanceList[i] / 100000000) * price , 2),
+            
+        }
+        rewardList.append(rewardDict)
+    
     balanceDict = {
+        'Hotspot 24hrs Total' : round(sum(total24hrs),2),
+        'Hotspot 24 hrs USD' : round(sum(total24hrs) * price,2),
+        'Hotspot 30 day Total' : round(sum(total30days),2),
+        'Hotspot 30 day USD' : round(sum(total30days) * price,2),
         'Total Balance' : round(bal,2),
-        'Total Balance in USD' : round(usdBal, 2)
+        'Total Balance in USD' : round(usdBal, 2),
+        
     }
-    return balanceDict
+    dataDict = {
+            'Balance' : balanceDict,
+            'Hotspot' : rewardList
+        }
+    return dataDict
             
 # Main Function
 def main():
@@ -88,18 +108,14 @@ def main():
     col_list = ["Account Addr"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
-    balanceList = list(np.concatenate(data).flat)
+    accAddr = list(np.concatenate(data).flat)
     
     # for loop to get rewards 
-    for i in range(len(addr)):
-        rewardList = get_rewards(addr[i], twentyfourHour, thirtyDays, hostName[i], hotspotName[i])
-    balance = get_balance(balanceList)
-    dataDict = {
-        'Balance' : balance,
-        'Hotspot' : rewardList
-    }
+    
+    rewardList = get_rewards(addr, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr)
+    
     # put the result into a json
-    jsonList = json.dumps(dataDict, indent=4)
+    jsonList = json.dumps(rewardList, indent=4)
     # change to this for aws Lambda
     # return{
     #     'statusCode' : 200,
