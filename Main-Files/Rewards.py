@@ -100,7 +100,11 @@ def main():
     }
     # put the result into a json
     jsonList = json.dumps(dataDict, indent=4)
-    # change to return for aws Lambda
+    # change to this for aws Lambda
+    # return{
+    #     'statusCode' : 200,
+    #     'body': jsonList
+    # }
     print(jsonList)
 
 if __name__ == "__main__":
