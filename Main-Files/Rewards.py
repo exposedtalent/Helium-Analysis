@@ -4,52 +4,54 @@
 import requests
 import pandas as pd
 import numpy as np
+import json
 
+rewardList = []
 # Function to get the rewards for the hotspots 
-def get_rewards(hotspotList, minDate):
-    rewardList = []
-    for i in range(len(hotspotList)):
-        url='https://api.helium.io/v1/hotspots/' + hotspotList[i] + '/rewards/sum?min_time=' + minDate
-        response = requests.get(url)
-        new_data = response.json()
-        rewards = new_data['data']['total']
-        rewardList.append(rewards)
+def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName):
+    #data = {'data' : [{ }] }
+    
+    # for i in range(len(hotspotList)):
+    url='https://api.helium.io/v1/hotspots/' + hotspot + '/rewards/sum?min_time=' + twentyfourHour
+    response = requests.get(url)
+    new_data = response.json()
+    reward24hrs = new_data['data']['total']
+    
+    url='https://api.helium.io/v1/hotspots/' + hotspot + '/rewards/sum?min_time=' + thirtyDays
+    response = requests.get(url)
+    new_data = response.json()
+    reward30days = new_data['data']['total']
+    
+    
+    data = {
+        'Hotspot Owner' : hostName,
+        'Hotspot Address' : hotspot,
+        'Hotspot Name' : hotspotName,
+        'Hotspot 24hrs reward' : round(reward24hrs, 2),
+        'Hotspot 30 day reward' : round(reward30days, 2)
+    }
+    rewardList.append(data)
     return rewardList
 
 def get_balance(addrList):
     balanceList = []
+    url='https://api.binance.com/api/v3/ticker/price?symbol=HNTUSDT'
+    response = requests.get(url)
+    new_data = response.json()
+    price = float(new_data['price'])
     for i in range(len(addrList)):
         url='https://api.helium.io/v1/accounts/' + addrList[i] + '/stats'
         response = requests.get(url)
         new_data = response.json()
         balance = new_data['data']['last_day'][0]['balance']
         balanceList.append(balance)
-    print("Total Balance : ", round(sum(balanceList) / 100000000, 2))
-    
-# Function to print out the result
-def result(rewardList, hotspot) : 
-    # Get the Host name in a list
-    col_list = ["Host Name"]
-    df = pd.read_csv('HeliumData.csv', usecols=col_list)
-    data = df.values
-    hostName = list(np.concatenate(data).flat)
-    
-    # Get the Hotspot Name in a list
-    col_list2 = ["Hotspot Name"]
-    df = pd.read_csv('HeliumData.csv', usecols=col_list2)
-    data = df.values
-    hotspotName = list(np.concatenate(data).flat)
-    
-    # For loop to print
-    for i in range(len(hotspot)):
-        print(
-            " Host Name : ", hostName[i], "\n",
-            "Hotspot Addr : ", hotspot[i], "\n",
-            "Hotspot Name : " , hotspotName[i], "\n",
-            "Rewards "  ,round(rewardList[i], 2), "\n"
-        )
-    print(" Reward Total: ", round(sum(rewardList),2), "\n")
-    
+    bal = sum(balanceList) / 100000000
+    usdBal = bal * price
+    data = {
+        'Total Balance' : round(bal,2),
+        'Total Balance in USD' : round(usdBal, 2)
+    }
+    rewardList.append(data)        
 # Main Function
 def main():
     # This is to figure out the time
@@ -62,21 +64,29 @@ def main():
     data = df.values
     addr = list(np.concatenate(data).flat)
     
+    col_list = ["Host Name"]
+    df = pd.read_csv('HeliumData.csv', usecols=col_list)
+    data = df.values
+    hostName = list(np.concatenate(data).flat)
+    
+    # Get the Hotspot Name in a list
+    col_list2 = ["Hotspot Name"]
+    df = pd.read_csv('HeliumData.csv', usecols=col_list2)
+    data = df.values
+    hotspotName = list(np.concatenate(data).flat)
+    
     # This is for getting the Hotspot Addr fromt the csv file
     col_list = ["Account Addr"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
+    
     balanceList = list(np.concatenate(data).flat)
-   
-    # For loop to call the get_rewards function
-    print("=================== 24 Hours ===================")
-    rewardList = get_rewards(addr, twentyfourHour )
-    result(rewardList,addr)
-    print("=================== 30 DAY ===================")
-    rewardList = get_rewards(addr, thirtyDays )
-    result(rewardList,addr)
-    print("=================== Total Balance ===================")
+    for i in range(len(addr)):
+        rewardList = get_rewards(addr[i], twentyfourHour, thirtyDays, hostName[i], hotspotName[i])
+    
     get_balance(balanceList)
+    jsonList = json.dumps(rewardList, indent=4)
+    print(jsonList)
 
 if __name__ == "__main__":
     main()
