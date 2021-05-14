@@ -22,15 +22,15 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName):
     reward30days = new_data['data']['total']
     
     # Put eveything into a dict
-    data = {
+    rewardDict = {
         'Hotspot Owner' : hostName,
         'Hotspot Address' : hotspot,
         'Hotspot Name' : hotspotName,
-        'Hotspot 24hrs reward' : round(reward24hrs, 2),
+        'Hotspot 24 hrs reward' : round(reward24hrs, 2),
         'Hotspot 30 day reward' : round(reward30days, 2)
     }
     # Append the dict into a list
-    rewardList.append(data)
+    rewardList.append(rewardDict)
     return rewardList
 
 # Function to get tthe total balance of all accounts
@@ -54,11 +54,11 @@ def get_balance(addrList):
     # Calculations
     bal = sum(balanceList) / 100000000
     usdBal = bal * price
-    data = {
+    balanceDict = {
         'Total Balance' : round(bal,2),
         'Total Balance in USD' : round(usdBal, 2)
     }
-    rewardList.append(data)
+    return balanceDict
             
 # Main Function
 def main():
@@ -93,10 +93,13 @@ def main():
     # for loop to get rewards 
     for i in range(len(addr)):
         rewardList = get_rewards(addr[i], twentyfourHour, thirtyDays, hostName[i], hotspotName[i])
-    get_balance(balanceList)
-    
+    balance = get_balance(balanceList)
+    dataDict = {
+        'Balance' : balance,
+        'Hotspot' : rewardList
+    }
     # put the result into a json
-    jsonList = json.dumps(rewardList, indent=4)
+    jsonList = json.dumps(dataDict, indent=4)
     # change to return for aws Lambda
     print(jsonList)
 
