@@ -11,13 +11,17 @@ rewardList = []
 def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr):
     total24hrs = []
     total30days = []
+    rewardChange = []
     
     for i in range(len(hotspot)):
         # URL for the 24 hours
-        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour
+        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour + '&bucket=day'
         response = requests.get(url)
         new_data = response.json()
-        reward24hrs = new_data['data']['total']
+        reward24hrs = new_data['data'][0]['total']
+        reward2day = new_data['data'][1]['total']
+        change = (round((reward2day - reward24hrs ) / reward2day * 100, 2))
+        rewardChange.append(change)
         total24hrs.append(reward24hrs)
         
         # URL for the 30 days 
@@ -26,7 +30,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
         new_data = response.json()
         reward30days = new_data['data']['total']
         total30days.append(reward30days)
-    
+
     
     # Append the dict into a list
     # Function to get tthe total balance of all accounts
@@ -57,6 +61,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
             'Hotspot Name' : hotspotName[i],
             'Hotspot 24H HNT' : round(total24hrs[i], 2),
             'Hotspot 24H USD' : round(total24hrs[i] * price, 2),
+            '24H Change' : rewardChange[i],
             'Hotspot 30D HNT' : round(total30days[i], 2),
             'Hotspot 30D USD' : round(total30days[i] * price, 2),
             'Wallet Balance' : round(balanceList[i] / 100000000 , 2),
@@ -82,8 +87,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
             
 # Main Function
 def main():
-    # This is to figure out the time
-    twentyfourHour = '-24%20hour'
+    twentyfourHour = '-2%20day'
     thirtyDays = '-30%20day'
 
     # This is for getting the Hotspot Addr fromt the csv file
