@@ -11,6 +11,7 @@ rewardList = []
 def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr):
     total24hrs = []
     total30days = []
+    
     for i in range(len(hotspot)):
         # URL for the 24 hours
         url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour
@@ -57,7 +58,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
             'Hotspot 24H HNT' : round(total24hrs[i], 2),
             'Hotspot 24H USD' : round(total24hrs[i] * price, 2),
             'Hotspot 30D HNT' : round(total30days[i], 2),
-            'Hotspot 30D USD' : round(total30days[i] * price,2),
+            'Hotspot 30D USD' : round(total30days[i] * price, 2),
             'Wallet Balance' : round(balanceList[i] / 100000000 , 2),
             'Wallet Balance USD' : round((balanceList[i] / 100000000) * price , 2),
             
@@ -65,11 +66,11 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
         rewardList.append(rewardDict)
     
     balanceDict = {
-        'Hotspots 24H HNT' : round(sum(total24hrs),2),
-        'Hotspots 24H USD' : round(sum(total24hrs) * price,2),
-        'Hotspots 30D HNT' : round(sum(total30days),2),
-        'Hotspots 30D USD' : round(sum(total30days) * price,2),
-        'Total HNT' : round(bal,2),
+        'Hotspots 24H HNT' : round(sum(total24hrs), 2),
+        'Hotspots 24H USD' : round(sum(total24hrs) * price, 2),
+        'Hotspots 30D HNT' : round(sum(total30days), 2),
+        'Hotspots 30D USD' : round(sum(total30days) * price, 2),
+        'Total HNT' : round(bal, 2),
         'Total USD' : round(usdBal, 2),
         
     }
@@ -109,13 +110,11 @@ def main():
     data = df.values
     accAddr = list(np.concatenate(data).flat)
     
-    # for loop to get rewards 
-    
     rewardList = get_rewards(addr, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr)
     
     # put the result into a json
-    jsonList = json.dumps(rewardList, indent=4)
-    # change to this for aws Lambda
+    jsonList = json.dumps(rewardList, indent = 4)
+    # change to this for aws Lambda instead of print
     # return{
     #     'statusCode' : 200,
     #     'body': jsonList
