@@ -143,16 +143,17 @@ def avg(rs):
 def main():
     # List of the hotspots names       
     hotspots = [
-                '112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
+                #'112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
                 # '112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
                 # '112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
-                '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
+                # '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
                 
                 # '11H8cjxUtx9WzCxPkbVq3AKzSYh7Wo5yWnPXLrf8eygiKt6hHVP',
                 # '11c4pxUfwby5rtz2PtRm4oxmndc8WAcQg5BxT7CNpU56hHqvp9h',
                 # '112KHUoQtauKc7hx2yDceHV1Q2X9DsCtdMeoK28gZMPJvHHLrAQz',
                 # '111MtVFr98Qs7Bs1u6CaVQFF2CjqJ83sLfxP1BPsAyR5h4Qa77A'
-                #'112YWEDhqBGDwnVsuCujvA8sg1cxTL4g9jZAY7PbTii7YPZcyNDm'
+                #'112YWEDhqBGDwnVsuCujvA8sg1cxTL4g9jZAY7PbTii7YPZcyNDm',
+                '112JDgqUnbKQtrbuRxcsQxQVZhjNjyj9esjA2AzpAxcDbdZ59o2G'
                 
                 ]
     # This is the main program
