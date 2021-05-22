@@ -1,12 +1,7 @@
 
-
-
-
 $(document).ready(function(){
     $.getJSON("../data.json", function(data){
-        
-        var keys = Object.keys(data);
-        console.log(data);
+    
         let array = data[0]['Hotspots'];
         let dict = data[0]['Balance'];
     
