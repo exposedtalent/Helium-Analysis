@@ -2,7 +2,6 @@ import requests
 import pandas as pd
 import numpy as np
 import json
-from json2html import *
 
 
 rewardList = []
