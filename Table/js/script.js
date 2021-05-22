@@ -3,7 +3,7 @@
 
 
 $(document).ready(function(){
-    $.getJSON("data.json", function(data){
+    $.getJSON("../data.json", function(data){
         
         var keys = Object.keys(data);
         console.log(data);
