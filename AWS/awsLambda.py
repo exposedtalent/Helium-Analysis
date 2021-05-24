@@ -2,12 +2,10 @@ import requests
 import pandas as pd
 import numpy as np
 import json
-import codecs
 
 rewardList = None
 
 def lambda_handler(event, context):
-    bucket = 'heliumrewardsdata'
     # This is to figure out the time
     twentyfourHour = '-2%20day'
     thirtyDays = '-30%20day'
