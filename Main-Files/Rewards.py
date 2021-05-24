@@ -66,7 +66,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
         new_data = response.json()
         reward24hrs = new_data['data'][0]['total']
         reward2day = new_data['data'][1]['total']
-        change = (round((reward2day - reward24hrs ) / reward2day * 100, 2))
+        change = (round((reward24hrs - reward2day) / reward2day * 100, 2))
         rewardChange.append(change)
         total24hrs.append(reward24hrs)
         
