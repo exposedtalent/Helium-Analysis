@@ -5,6 +5,7 @@ import json
 
 rewardList = None
 
+
 def lambda_handler(event, context):
     # This is to figure out the time
     twentyfourHour = '-2%20day'
@@ -15,26 +16,26 @@ def lambda_handler(event, context):
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
     addr = list(np.concatenate(data).flat)
-    
+
     # Get the Host's Name from csv
     col_list = ["Host Name"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
     hostName = list(np.concatenate(data).flat)
-    
+
     # Get the Hotspot Name in a list
     col_list2 = ["Hotspot Name"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list2)
     data = df.values
     hotspotName = list(np.concatenate(data).flat)
-    
+
     # This is for getting the Hotspot Addr fromt the csv file
     col_list = ["Account Addr"]
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
     accAddr = list(np.concatenate(data).flat)
     # Calling the get_rewards and putting the data into reward list
-    rewardsList = get_rewards(addr, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr)
+    rewardsList = get_rewards(addr, twentyfourHour,thirtyDays, hostName, hotspotName, accAddr)
     # Dynamically adding data from the varibles into a string used for js script
     balanceHtmlDict = """
     let dict = {
@@ -44,16 +45,16 @@ def lambda_handler(event, context):
         "Hotspots_30D_HNT": %s,
         "Hotspots_30D_USD": %s,
         "Total_HNT": %s,
-        "Total_USD": %s}"""%(
-            rewardsList['Balance']['HNT_Price'],
-            rewardsList['Balance']['Hotspots_24H_HNT'],
-            rewardsList['Balance']['Hotspots_24H_USD'],
-            rewardsList['Balance']['Hotspots_30D_HNT'],
-            rewardsList['Balance']['Hotspots_30D_USD'],
-            rewardsList['Balance']['Total_HNT'],
-            rewardsList['Balance']['Total_USD'],
-                
-    )  
+        "Total_USD": %s}""" % (
+        rewardsList['Balance']['HNT_Price'],
+        rewardsList['Balance']['Hotspots_24H_HNT'],
+        rewardsList['Balance']['Hotspots_24H_USD'],
+        rewardsList['Balance']['Hotspots_30D_HNT'],
+        rewardsList['Balance']['Hotspots_30D_USD'],
+        rewardsList['Balance']['Total_HNT'],
+        rewardsList['Balance']['Total_USD'],
+
+    )
     # Dynamically adding data from the varibles into a string used for js script
     temp = """"""
     for i in range(len(rewardsList['Hotspots'])):
@@ -70,7 +71,7 @@ def lambda_handler(event, context):
             "Wallet_Balance": %s,
             "Wallet_Balance_USD": %s
         },
-        """%(
+        """ % (
             rewardsList['Hotspots'][i]['Hotspot_Owner'],
             rewardsList['Hotspots'][i]['Hotspot_Address'],
             rewardsList['Hotspots'][i]['Hotspot_Name'],
@@ -83,7 +84,7 @@ def lambda_handler(event, context):
             rewardsList['Hotspots'][i]['Wallet_Balance_USD'],
         )
         temp += data
-    hotspotsHtmlList = """\nlet array = [%s]"""%temp  
+    hotspotsHtmlList = """\nlet array = [%s]""" % temp
 
     # Top half of the html with inline css code. This creates a table and style it using css
     topHtml = """<!DOCTYPE html><html ><head>
@@ -181,10 +182,9 @@ def lambda_handler(event, context):
     }
     </style>
     
-      
     </head>
     
-    <body>
+    <body style="background-color:lightblue;">
       <h1>Balance</h1>
     <table class="rwd-table">
       <tr>
@@ -281,15 +281,15 @@ def lambda_handler(event, context):
     """
     # Finally put together the differernt html strings into one to be returned
     finalHtml = topHtml + balanceHtmlDict + hotspotsHtmlList + bottomHtml
-    
-    # returns the final html string and that is run on the client side 
+
+    # returns the final html string and that is run on the client side
     return{
         "statusCode": 200,
-        "headers": {'Content-Type': 'text/html'},   
+        "headers": {'Content-Type': 'text/html'},
         "body": finalHtml
     }
-    
-    
+
+
 # Function to get the reward summary of the given hotspots
 def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr):
     # initlize the various lists
@@ -298,40 +298,43 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     total30days = []
     rewardChange = []
     balanceList = []
-    
+
     # for loop for getting the reward summary from the Helium API
     for i in range(len(hotspot)):
         # URL for the 24 hours
-        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour + '&bucket=day'
+        url = 'https://api.helium.io/v1/hotspots/' + \
+            hotspot[i] + '/rewards/sum?min_time=' + \
+            twentyfourHour + '&bucket=day'
         response = requests.get(url)
         new_data = response.json()
         reward24hrs = new_data['data'][0]['total']
         reward2day = new_data['data'][1]['total']
-        change = (round((reward2day - reward24hrs ) / reward2day * 100, 2))
+        change = (round((reward2day - reward24hrs) / reward2day * 100, 2))
         rewardChange.append(change)
         total24hrs.append(reward24hrs)
-        
-        # URL for the 30 days 
-        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + thirtyDays
+
+        # URL for the 30 days
+        url = 'https://api.helium.io/v1/hotspots/' + \
+            hotspot[i] + '/rewards/sum?min_time=' + thirtyDays
         response = requests.get(url)
         new_data = response.json()
         reward30days = new_data['data']['total']
         total30days.append(reward30days)
-    
+
     # Binance API to get the current rate
-    url='https://api.binance.com/api/v3/ticker/price?symbol=HNTUSDT'
+    url = 'https://api.binance.com/api/v3/ticker/price?symbol=HNTUSDT'
     response = requests.get(url)
     new_data = response.json()
     price = float(new_data['price'])
-    
+
     # For loop to get the account balance of the user
     for i in range(len(accAddr)):
-        url='https://api.helium.io/v1/accounts/' + accAddr[i] + '/stats'
+        url = 'https://api.helium.io/v1/accounts/' + accAddr[i] + '/stats'
         response = requests.get(url)
         new_data = response.json()
         balance = new_data['data']['last_day'][0]['balance']
         balanceList.append(balance)
-        
+
     # Calculations
     bal = sum(balanceList) / 100000000
     usdBal = bal * price
@@ -339,35 +342,35 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     for i in range(len(hotspot)):
         # Put eveything into a dict
         rewardDict = {
-            'Hotspot_Owner' : hostName[i],
-            'Hotspot_Address' : hotspot[i],
-            'Hotspot_Name' : hotspotName[i],
-            'Hotspot_24H_HNT' : round(total24hrs[i], 2),
-            'Hotspot_24H_USD' : round(total24hrs[i] * price, 2),
-            'Change_24H' : rewardChange[i],
-            'Hotspot_30D_HNT' : round(total30days[i], 2),
-            'Hotspot_30D_USD' : round(total30days[i] * price, 2),
-            'Wallet_Balance' : round(balanceList[i] / 100000000 , 2),
-            'Wallet_Balance_USD' : round((balanceList[i] / 100000000) * price , 2),
-            
+            'Hotspot_Owner': hostName[i],
+            'Hotspot_Address': hotspot[i],
+            'Hotspot_Name': hotspotName[i],
+            'Hotspot_24H_HNT': round(total24hrs[i], 2),
+            'Hotspot_24H_USD': round(total24hrs[i] * price, 2),
+            'Change_24H': rewardChange[i],
+            'Hotspot_30D_HNT': round(total30days[i], 2),
+            'Hotspot_30D_USD': round(total30days[i] * price, 2),
+            'Wallet_Balance': round(balanceList[i] / 100000000, 2),
+            'Wallet_Balance_USD': round((balanceList[i] / 100000000) * price, 2),
+
         }
         rewardList.append(rewardDict)
     # Dict for the balance part of the json
     balanceDict = {
-        'HNT_Price' : round(price, 2),
-        'Hotspots_24H_HNT' : round(sum(total24hrs), 2),
-        'Hotspots_24H_USD' : round(sum(total24hrs) * price, 2),
-        'Hotspots_30D_HNT' : round(sum(total30days), 2),
-        'Hotspots_30D_USD' : round(sum(total30days) * price, 2),
-        'Total_HNT' : round(bal, 2),
-        'Total_USD' : round(usdBal, 2),
-        
+        'HNT_Price': round(price, 2),
+        'Hotspots_24H_HNT': round(sum(total24hrs), 2),
+        'Hotspots_24H_USD': round(sum(total24hrs) * price, 2),
+        'Hotspots_30D_HNT': round(sum(total30days), 2),
+        'Hotspots_30D_USD': round(sum(total30days) * price, 2),
+        'Total_HNT': round(bal, 2),
+        'Total_USD': round(usdBal, 2),
+
     }
     # Put the two different dicts into one big one for the json
     dataDict = {
-            'Balance' : balanceDict,
-            'Hotspots' : rewardList,
-            
-        }
+        'Balance': balanceDict,
+        'Hotspots': rewardList,
+
+    }
     # return
     return dataDict
