@@ -35,10 +35,9 @@ def lambda_handler(event, context):
     df = pd.read_csv('HeliumData.csv', usecols=col_list)
     data = df.values
     accAddr = list(np.concatenate(data).flat)
-    
+    # Calling the get_rewards and putting the data into reward list
     rewardsList = get_rewards(addr, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr)
-    # print(rewardsList['Hotspots'][0]['Hotspot_Address'])
-
+    # Dynamically adding data from the varibles into a string used for js script
     balanceHtmlDict = """
     let dict = {
         "HNT_Price":%s,
@@ -56,9 +55,8 @@ def lambda_handler(event, context):
             rewardsList['Balance']['Total_HNT'],
             rewardsList['Balance']['Total_USD'],
                 
-    )
-                
-    
+    )  
+    # Dynamically adding data from the varibles into a string used for js script
     temp = """"""
     for i in range(len(rewardsList['Hotspots'])):
         data = """ 
@@ -89,7 +87,7 @@ def lambda_handler(event, context):
         temp += data
     hotspotsHtmlList = """\nlet array = [%s]"""%temp  
 
-    # put the result into a json
+    # Top half of the html with inline css code. This creates a table and style it using css
     topHtml = """<!DOCTYPE html><html ><head>
       <meta charset="UTF-8">
       <title>Wifi Mist</title>
@@ -188,7 +186,7 @@ def lambda_handler(event, context):
       
     </head>
     
-    <body style="background-color:lightblue;">
+    <body>
       <h1>Balance</h1>
     <table class="rwd-table">
       <tr>
@@ -221,7 +219,7 @@ def lambda_handler(event, context):
       <tbody id="myTable">
         <script>
     """
-    
+    # This is the bottom of the html with js script inline
     bottomHtml = """
     $('th').on('click', function(){
                 var column = $(this).data('column')
@@ -283,9 +281,10 @@ def lambda_handler(event, context):
     </body>
     </html>
     """
+    # Finally put together the differernt html strings into one to be returned
     finalHtml = topHtml + balanceHtmlDict + hotspotsHtmlList + bottomHtml
     
-    # change to this for aws Lambda instead of print
+    # returns the final html string and that is run on the client side 
     return{
         "statusCode": 200,
         "headers": {'Content-Type': 'text/html'},   
@@ -293,13 +292,16 @@ def lambda_handler(event, context):
     }
     
     
-
+# Function to get the reward summary of the given hotspots
 def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr):
+    # initlize the various lists
     rewardList = []
     total24hrs = []
     total30days = []
     rewardChange = []
+    balanceList = []
     
+    # for loop for getting the reward summary from the Helium API
     for i in range(len(hotspot)):
         # URL for the 24 hours
         url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour + '&bucket=day'
@@ -317,11 +319,6 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
         new_data = response.json()
         reward30days = new_data['data']['total']
         total30days.append(reward30days)
-
-    
-    # Append the dict into a list
-    # Function to get tthe total balance of all accounts
-    balanceList = []
     
     # Binance API to get the current rate
     url='https://api.binance.com/api/v3/ticker/price?symbol=HNTUSDT'
@@ -340,6 +337,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     # Calculations
     bal = sum(balanceList) / 100000000
     usdBal = bal * price
+    # Loop to get the data into a dict that is appened to a list
     for i in range(len(hotspot)):
         # Put eveything into a dict
         rewardDict = {
@@ -356,7 +354,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
             
         }
         rewardList.append(rewardDict)
-    
+    # Dict for the balance part of the json
     balanceDict = {
         'HNT_Price' : round(price, 2),
         'Hotspots_24H_HNT' : round(sum(total24hrs), 2),
@@ -367,10 +365,11 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
         'Total_USD' : round(usdBal, 2),
         
     }
+    # Put the two different dicts into one big one for the json
     dataDict = {
             'Balance' : balanceDict,
             'Hotspots' : rewardList,
             
         }
-    
+    # return
     return dataDict
