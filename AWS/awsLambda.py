@@ -4,7 +4,7 @@ import numpy as np
 import json
 import codecs
 
-rewardList = []
+rewardList = None
 
 def lambda_handler(event, context):
     bucket = 'heliumrewardsdata'
@@ -188,7 +188,7 @@ def lambda_handler(event, context):
       
     </head>
     
-    <body>
+    <body style="background-color:lightblue;">
       <h1>Balance</h1>
     <table class="rwd-table">
       <tr>
@@ -295,7 +295,7 @@ def lambda_handler(event, context):
     
 
 def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr):
-    
+    rewardList = []
     total24hrs = []
     total30days = []
     rewardChange = []
