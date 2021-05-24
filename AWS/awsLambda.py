@@ -36,55 +36,11 @@ def lambda_handler(event, context):
     accAddr = list(np.concatenate(data).flat)
     # Calling the get_rewards and putting the data into reward list
     rewardsList = get_rewards(addr, twentyfourHour,thirtyDays, hostName, hotspotName, accAddr)
+    
     # Dynamically adding data from the varibles into a string used for js script
-    balanceHtmlDict = """
-    let dict = {
-        "HNT_Price":%s,
-        "Hotspots_24H_HNT": %s,
-        "Hotspots_24H_USD": %s,
-        "Hotspots_30D_HNT": %s,
-        "Hotspots_30D_USD": %s,
-        "Total_HNT": %s,
-        "Total_USD": %s}""" % (
-        rewardsList['Balance']['HNT_Price'],
-        rewardsList['Balance']['Hotspots_24H_HNT'],
-        rewardsList['Balance']['Hotspots_24H_USD'],
-        rewardsList['Balance']['Hotspots_30D_HNT'],
-        rewardsList['Balance']['Hotspots_30D_USD'],
-        rewardsList['Balance']['Total_HNT'],
-        rewardsList['Balance']['Total_USD'],
-
-    )
+    balanceHtmlDict = """let dict = %s"""%rewardsList['Balance']
     # Dynamically adding data from the varibles into a string used for js script
-    temp = """"""
-    for i in range(len(rewardsList['Hotspots'])):
-        data = """ 
-        {
-            "Hotspot_Owner": "%s",
-            "Hotspot_Address": "%s",
-            "Hotspot_Name": "%s",
-            "Hotspot_24H_HNT": %s,
-            "Hotspot_24H_USD": %s,
-            "Change_24H": %s,
-            "Hotspot_30D_HNT": %s,
-            "Hotspot_30D_USD": %s,
-            "Wallet_Balance": %s,
-            "Wallet_Balance_USD": %s
-        },
-        """ % (
-            rewardsList['Hotspots'][i]['Hotspot_Owner'],
-            rewardsList['Hotspots'][i]['Hotspot_Address'],
-            rewardsList['Hotspots'][i]['Hotspot_Name'],
-            rewardsList['Hotspots'][i]['Hotspot_24H_HNT'],
-            rewardsList['Hotspots'][i]['Hotspot_24H_USD'],
-            rewardsList['Hotspots'][i]['Change_24H'],
-            rewardsList['Hotspots'][i]['Hotspot_30D_HNT'],
-            rewardsList['Hotspots'][i]['Hotspot_30D_USD'],
-            rewardsList['Hotspots'][i]['Wallet_Balance'],
-            rewardsList['Hotspots'][i]['Wallet_Balance_USD'],
-        )
-        temp += data
-    hotspotsHtmlList = """\nlet array = [%s]""" % temp
+    hotspotsHtmlList = """\nlet array = %s"""%rewardsList['Hotspots']
 
     # Top half of the html with inline css code. This creates a table and style it using css
     topHtml = """<!DOCTYPE html><html ><head>
@@ -92,96 +48,8 @@ def lambda_handler(event, context):
       <title>Wifi Mist</title>
       <script src="https://s.codepen.io/assets/libs/modernizr.js" type="text/javascript"></script>
       <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-    
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-    <style type="text/css" media="screen">
-    @import "https://fonts.googleapis.com/css?family=Montserrat:300,400,700";
-    .rwd-table {
-      margin: 1em 0;
-      min-width: 300px;
-    }
-    .rwd-table tr {
-      border-top: 1px solid #ddd;
-      
-      border-bottom: 1px solid #ddd;
-    }
-    .rwd-table th {
-      display: none;
-    }
-    .rwd-table td {
-      display: block;
-    }
-    .rwd-table td:first-child {
-      padding-top: .5em;
-    }
-    .rwd-table td:last-child {
-      padding-bottom: .5em;
-    }
-    .rwd-table td:before {
-      content: attr(data-th) ": ";
-      font-weight: bold;
-      width: 6.5em;
-      display: inline-block;
-    }
-    @media (min-width: 480px) {
-      .rwd-table td:before {
-        display: none;
-      }
-    }
-    .rwd-table th, .rwd-table td {
-      text-align: left;
-    }
-    @media (min-width: 480px) {
-      .rwd-table th, .rwd-table td {
-        display: table-cell;
-        padding: .25em .5em;
-      }
-      .rwd-table th:first-child, .rwd-table td:first-child {
-        padding-left: 0;
-      }
-      .rwd-table th:last-child, .rwd-table td:last-child {
-        padding-right: 0;
-      }
-    }
-    
-    body {
-      padding: 0 2em;
-      font-family: Montserrat, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-      color: #444;
-      background: #eee;
-     
-    }
-    
-    h1 {
-      font-weight: normal;
-      letter-spacing: -1px;
-      color: #34495E;
-    }
-    
-    .rwd-table {
-      background: #34495E;
-      color: #fff;
-      border-radius: .4em;
-      overflow: hidden;
-    }
-    .rwd-table tr {
-      border-color: #46637f;
-    }
-    .rwd-table th, .rwd-table td {
-      margin: .5em 1em;
-    }
-    @media (min-width: 480px) {
-      .rwd-table th, .rwd-table td {
-        padding: 1em !important;
-      }
-    }
-    .rwd-table th, .rwd-table td:before {
-      color: #dd5;
-    }
-    </style>
-    
+      <link rel="stylesheet" href= "https://heliumfrontend.s3.amazonaws.com/style.css">
+
     </head>
     
     <body style="background-color:lightblue;">
@@ -302,20 +170,17 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     # for loop for getting the reward summary from the Helium API
     for i in range(len(hotspot)):
         # URL for the 24 hours
-        url = 'https://api.helium.io/v1/hotspots/' + \
-            hotspot[i] + '/rewards/sum?min_time=' + \
-            twentyfourHour + '&bucket=day'
+        url = 'https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour + '&bucket=day'
         response = requests.get(url)
         new_data = response.json()
         reward24hrs = new_data['data'][0]['total']
         reward2day = new_data['data'][1]['total']
-        change = (round((reward2day - reward24hrs) / reward2day * 100, 2))
+        change = (round((reward24hrs - reward2day) / reward2day * 100, 2))
         rewardChange.append(change)
         total24hrs.append(reward24hrs)
 
         # URL for the 30 days
-        url = 'https://api.helium.io/v1/hotspots/' + \
-            hotspot[i] + '/rewards/sum?min_time=' + thirtyDays
+        url = 'https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + thirtyDays
         response = requests.get(url)
         new_data = response.json()
         reward30days = new_data['data']['total']
