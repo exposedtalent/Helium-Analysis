@@ -1,9 +1,9 @@
-
+/* global $*/
 $(document).ready(function(){
     $.getJSON("../data.json", function(data){
     
-        let array = data[0]['Hotspots'];
-        let dict = data[0]['Balance'];
+        let array = data['Hotspots'];
+        let dict = data['Balance'];
     
         buildBalTable(dict)
         buildTable(array)
