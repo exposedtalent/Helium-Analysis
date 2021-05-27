@@ -8,6 +8,7 @@ import requests
 from datetime import datetime
 import pandas as pd
 import numpy as np
+import json
 
 # Function to get the reward scale of each of the challengee of the witnesses
 def get_reward_scale(challengee):
@@ -67,6 +68,9 @@ def analyze_hotspot(hotspot, pagecount, rewardScale):
 
 # Function for to print the small and detailed summary of the parsed data 
 def summary(file,rewardScale):
+    finalDict = {}
+    hotspotNameDict = {}
+    witnesseDict = {}
     # Looks at only the Witnesses col and prints the num of Witnesses 
     col_list = ["Witnesses"]
     df = pd.read_csv(file, usecols=col_list)
@@ -103,25 +107,29 @@ def summary(file,rewardScale):
             "Total Witnesses : ", onetofour + occurMore, "\n",
             )
     else :
-        print(
-            "============= Witnesses =============\n"
-            " 1 Witnesses : ", occurOne,"\n", 
-            "2 Witnesses : ", occurTwo, "\n",
-            "3 Witnesses : ", occurThree, "\n",
-            "4 Witnesses : ", occurFour, "\n",
-            "More than 5 Witnesses :", occurMore, "\n\n",
-            "Total Witnesses from 1-4 : ", onetofour, "\n",
-            "Total Witnesses : ", onetofour + occurMore, "\n",
-            )
+        witnesseDict = {
+            "1_Wtinesses" : occurOne,
+            "2_Wtinesses" : occurTwo,
+            "3_Wtinesses" : occurThree,
+            "4_Wtinesses" : occurFour,
+            "5_Witneeses_And_Up" : occurMore,
+            "Total_Witnesses_from_1-4" : onetofour, 
+            "Total_Witnesses" : onetofour + occurMore
+            
+        }
+    hotspotNameDict = {
+        "Hotspots_with_1_Witnesses" : remove_dup(Challengee[0:occurOne].values), 
+        "Hotspots_with_2_Witnesses" : remove_dup(Challengee[occurOne:occurOne+occurTwo].values),
+        "Hotspots_with_3_Witnesses" : remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), 
+        "Hotspots_with_4_Witnesses" : remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values)
+        
+    }
     
-    print(
-        "========================= Names of the Hotspots =========================\n "
-        "Rounters with 1 witnesses :\n", remove_dup(Challengee[0:occurOne].values), "\n\n"
-        "Rounters with 2 witnesses :\n", remove_dup(Challengee[occurOne:occurOne+occurTwo].values), "\n\n",
-        "Rounter with 3 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo:occurOne+occurTwo+occurThree].values), "\n\n",
-        "Rounter with 4 witnesses :\n", remove_dup(Challengee[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour].values), "\n\n\n",
-    )
-
+    finalDict = {
+        "Witnesses": witnesseDict,
+        "HotspotName": hotspotNameDict
+    }
+    return finalDict
 # Function to remove the duplicates in the hotspots name 
 def remove_dup(x):
     tuple_line = [tuple(pt) for pt in x]                            # convert list of list into list of tuple
@@ -143,7 +151,7 @@ def avg(rs):
 def main():
     # List of the hotspots names       
     hotspots = [
-                #'112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
+                '112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
                 # '112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
                 # '112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
                 # '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
@@ -153,11 +161,11 @@ def main():
                 # '112KHUoQtauKc7hx2yDceHV1Q2X9DsCtdMeoK28gZMPJvHHLrAQz',
                 # '111MtVFr98Qs7Bs1u6CaVQFF2CjqJ83sLfxP1BPsAyR5h4Qa77A'
                 #'112YWEDhqBGDwnVsuCujvA8sg1cxTL4g9jZAY7PbTii7YPZcyNDm',
-                '112JDgqUnbKQtrbuRxcsQxQVZhjNjyj9esjA2AzpAxcDbdZ59o2G'
+                # '112JDgqUnbKQtrbuRxcsQxQVZhjNjyj9esjA2AzpAxcDbdZ59o2G'
                 
                 ]
     # This is the main program
-    pageNum = int(input("Enter the page amount to check : "))
+    pageNum = 3
     # Turn True for for to print the avg reward scale 
     # WARNING : ADDS A LOT MORE TIME TO EXECUTE
     rewardScale = False
@@ -166,7 +174,8 @@ def main():
         df = pd.DataFrame(data)
         df.to_csv('hotspotData.csv')
         sortCSV('hotspotData.csv')
-        summary('Sorted_hotspotData.csv', rewardScale)
-
+        analysis = summary('Sorted_hotspotData.csv', rewardScale)
+    with open('analysis.json','w') as jsonFile:
+        json.dump(analysis, jsonFile)
 if __name__ == "__main__":
     main()
