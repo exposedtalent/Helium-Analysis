@@ -38,7 +38,7 @@ def main():
     accAddr = list(np.concatenate(data).flat)
     
     rewardList = get_rewards(addr, twentyfourHour, thirtyDays, hostName, hotspotName, accAddr)
-    
+
     # put the result into a json
     with open('data.json','w') as jsonFile:
         json.dump(rewardList, jsonFile)
