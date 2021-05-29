@@ -49,11 +49,16 @@ def lambda_handler(event, context):
       <script src="https://s.codepen.io/assets/libs/modernizr.js" type="text/javascript"></script>
       <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
       <link rel="stylesheet" href= "https://heliumfrontend.s3.amazonaws.com/style.css">
-
+    <style>
+    td[data-href]{
+    cursor: pointer;
+    }
+    </style>
     </head>
     
     <body style="background-color:lightblue;">
       <h1>Balance</h1>
+     <div style="overflow-x:auto;">
     <table class="rwd-table">
       <tr>
         <th>HNT Price</th>
@@ -67,7 +72,9 @@ def lambda_handler(event, context):
       <tbody id="myBalTable">
       
     </table>
+    </div>
     <h1>Hotspots Information</h1>
+    <div style="overflow-x:auto;">
     <table class="rwd-table">
     
         <th data-column='HotspotOwner' data-order='desc'>Hotspot Owner &#9650</th>
@@ -83,6 +90,8 @@ def lambda_handler(event, context):
         </tr>
     
       <tbody id="myTable">
+     </table>
+    </div>
         <script>
     """
     # This is the bottom of the html with js script inline
@@ -103,6 +112,10 @@ def lambda_handler(event, context):
                 buildTable(array)
             
             })
+     $(document.body).on("click", "td[data-href]", function (){
+            $(this).text();
+            window.location.href = this.dataset.href
+        })
     buildTable(array)
     buildBalTable(dict)
     
@@ -125,10 +138,11 @@ def lambda_handler(event, context):
     function buildTable(data){
         let table = document.getElementById("myTable")
         table.innerHTML = ""
+        base_url = "https://gfz4azqik2.execute-api.us-east-2.amazonaws.com/default/invoke-HeliumRewards/";        
         for (let i = 0; i < data.length; i++){
             let row = `<tr>
                 <td>${data[i].Hotspot_Owner}</td>
-                <td>${data[i].Hotspot_Address}</td>
+                <td data-href="${base_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Address}</td>
                 <td>${data[i].Hotspot_Name}</td>
                 <td>${data[i].Hotspot_24H_HNT}</td>
                 <td>${data[i].Hotspot_24H_USD}</td>
@@ -143,7 +157,7 @@ def lambda_handler(event, context):
     }
       </script>
     
-    </table>
+    
     </body>
     </html>
     """
@@ -152,7 +166,7 @@ def lambda_handler(event, context):
 
     # returns the final html string and that is run on the client side
     return{
-        "statusCode": 200,
+        # "statusCode": 200,
         "headers": {'Content-Type': 'text/html'},
         "body": finalHtml
     }
