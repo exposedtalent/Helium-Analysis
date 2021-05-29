@@ -126,22 +126,11 @@ def analyze_hotspot(hotspot, pagecount, rewardScale):
             timestamp = datetime.fromtimestamp(i['time']).strftime("%Y-%m-%d-%I:%M:%S")
             challengee = i['path'][0]['challengee']
             # Get the reward scale of the challengee
-            if rewardScale:
-                reward_scale = get_reward_scale(challengee)
             street = i['path'][0]['geocode']['short_street']
             city = i['path'][0]['geocode']['short_city']
             witnesses = len(i['path'][0]['witnesses'])
             
             # Create a dict of the data
-            if(witnesses != 0 and rewardScale):
-                alltheData = {
-                    'TimeStamp' : timestamp,
-                    'Challengee' : challengee,
-                    'reward_scale': reward_scale,
-                    'Street'    : street,
-                    'City'      : city,
-                    'Witnesses' : witnesses
-                }
             if(witnesses != 0):
                 alltheData = {
                     'TimeStamp' : timestamp,
@@ -182,28 +171,17 @@ def summary(file,rewardScale):
     occurFour = np.count_nonzero(data == 4)
     occurMore = np.count_nonzero(data >= 5)
     onetofour = occurOne + occurTwo + occurThree + occurFour 
-    if rewardScale:
-        print(
-            "============= Witnesses =============\n"
-            " 1 Witnesses : ", occurOne, "\tAVG Reward Scale :", round(avg(rs[0:occurOne]),3),"\n", 
-            "2 Witnesses : ", occurTwo, "\tAVG Reward Scale :", round(avg(rs[occurOne:occurOne+occurTwo]),3),"\n",
-            "3 Witnesses : ", occurThree, "\tAVG Reward Scale :", round(avg(rs[occurOne+occurTwo:occurOne+occurTwo+occurThree]),3),"\n",
-            "4 Witnesses : ", occurFour, "\tAVG Reward Scale :", round(avg(rs[occurOne+occurTwo+occurThree:occurOne+occurTwo+occurThree+occurFour]),3),"\n",
-            "More than 5 Witnesses :", occurMore, "\n\n",
-            "Total Witnesses from 1-4 : ", onetofour, "\n",
-            "Total Witnesses : ", onetofour + occurMore, "\n",
-            )
-    else :
-        witnesseDict = {
-            "Witnesses_1" : occurOne,
-            "Witnesses_2" : occurTwo,
-            "Witnesses_3" : occurThree,
-            "Witnesses_4" : occurFour,
-            "Witnesses_5_and_up" : occurMore,
-            "Total_Witnesses_from_1_to_4" : onetofour, 
-            "Total_Witnesses" : onetofour + occurMore
-            
-        }
+    
+    witnesseDict = {
+        "Witnesses_1" : occurOne,
+        "Witnesses_2" : occurTwo,
+        "Witnesses_3" : occurThree,
+        "Witnesses_4" : occurFour,
+        "Witnesses_5_and_up" : occurMore,
+        "Total_Witnesses_from_1_to_4" : onetofour, 
+        "Total_Witnesses" : onetofour + occurMore
+        
+    }
     hotspotNameDict = {
         "Hotspots_with_1_Witnesses" : remove_dup(Challengee[0:occurOne].values), 
         "Hotspots_with_2_Witnesses" : remove_dup(Challengee[occurOne:occurOne+occurTwo].values),
