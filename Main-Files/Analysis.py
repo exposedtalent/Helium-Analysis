@@ -9,6 +9,11 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 import json
+import boto3
+from io import StringIO
+import s3fs
+
+
 
 # Function to get the reward scale of each of the challengee of the witnesses
 def get_reward_scale(challengee):
@@ -151,10 +156,10 @@ def avg(rs):
 def main():
     # List of the hotspots names       
     hotspots = [
-                '112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
+                # '112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg',
                 # '112Cggcbje3yS4a1YpfyVNt1B2DTYNqiFjwaNEvfJp6fhc8UPuLc',
                 # '112SDjb928fBrnhzLLLif1ZNowE9E8VYfkHLoQTUoUQtuijpaPVd',
-                # '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
+                '112na4aZ1XZsFFtAwUxtEfvn1kkP37yQ8zaTVvYBBEfkMEUkyzhx',
                 
                 # '11H8cjxUtx9WzCxPkbVq3AKzSYh7Wo5yWnPXLrf8eygiKt6hHVP',
                 # '11c4pxUfwby5rtz2PtRm4oxmndc8WAcQg5BxT7CNpU56hHqvp9h',
@@ -165,17 +170,18 @@ def main():
                 
                 ]
     # This is the main program
-    pageNum = 3
+    pageNum = 5
     # Turn True for for to print the avg reward scale 
     # WARNING : ADDS A LOT MORE TIME TO EXECUTE
     rewardScale = False
     for i in range(len(hotspots)):
         data = analyze_hotspot(hotspots[i], pageNum, rewardScale)
         df = pd.DataFrame(data)
-        df.to_csv('hotspotData.csv')
+        df.to_csv('hotspotData.csv', index=False)
         sortCSV('hotspotData.csv')
         analysis = summary('Sorted_hotspotData.csv', rewardScale)
-    with open('analysis.json','w') as jsonFile:
-        json.dump(analysis, jsonFile)
+        jsonList = json.dumps(analysis, indent = 4)
+        print(jsonList)
+    
 if __name__ == "__main__":
     main()
