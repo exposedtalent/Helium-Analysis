@@ -31,7 +31,6 @@ $(document).ready(function () {
 });
 
 
-
 function buildBalTable(data) {
     let table = document.getElementById("myBalTable");
     let row = `<tr>
