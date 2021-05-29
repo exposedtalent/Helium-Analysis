@@ -172,3 +172,5 @@ def sortCSV(file):
     to_csv(sorted_df.to_csv())
 
 
+def avg(rs):
+    return sum(rs) / len(rs)
