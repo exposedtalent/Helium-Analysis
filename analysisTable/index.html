@@ -6,10 +6,13 @@
 
   <script src="https://s.codepen.io/assets/libs/modernizr.js" type="text/javascript"></scrip>
   <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-<link rel="stylesheet" href= "https://heliumfrontend.s3.amazonaws.com/style.css">
+  <link rel="stylesheet" href= "https://heliumfrontend.s3.amazonaws.com/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js" integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 
 <body style="background-color:lightblue;">
+  
   <h1>Witnesses</h1>
   <div style="overflow-x:auto;">
 <table class="rwd-table">
@@ -27,8 +30,12 @@
   
 </table>
   <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    
 
     <script src="js/Analysisscript.js"></script>
+    <div style="width: 35%">
+    <canvas id="barChart" height = "400" width="400"></canvas>
+    </div>
 
 </body>
 </html>
