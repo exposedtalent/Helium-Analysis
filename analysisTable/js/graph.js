@@ -41,7 +41,6 @@ $(document).ready(function () {
 
 
 function buildGraph(totalArray, timeArray) {
-    console.log("inside the func")
     const chart = document.getElementById("barChart");
     let lineChart = new Chart(chart, {
         type: "bar",
@@ -62,7 +61,6 @@ function buildGraph(totalArray, timeArray) {
 }
 
 function buildGraph2(totalArray, timeArray) {
-    console.log("inside the func")
     const chart = document.getElementById("barChart2");
     let lineChart = new Chart(chart, {
         type: "bar",
