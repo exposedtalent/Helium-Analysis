@@ -11,9 +11,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js" integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 
-<body style="background-color:lightblue;">
-  
+<body style="background-color:e0dfdb;">
   <h1>Witnesses</h1>
+  <div style="overflow-x:auto;">
+  
 <table class="rwd-table">
   <tr>
     <th> Hotspot </th>
@@ -27,17 +28,21 @@
   </tr>
   <tbody id="myTable">
   
+  
 </table>
+</div>
   <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-  <div class="section">
-    <div id= "graph" style= "width: 35%" class = "element-left">
-      <canvas id="barChart" style="width: 300px; height: 300px;"></canvas>
+  <h1> 30 and 7 day Graphs </h1>
+
+    <div id= "graph" style= "width: 50%" >
+      <canvas id="barChart"></canvas>
     </div>
-    <div id= "graph" style= "width: 35%" class = "element-right">
-      <canvas id="barChart2" style="width: 300px; height: 300px;"></canvas>
+    <div id= "graph" style= "width: 50%" padding-left="100px" >
+      <canvas id="barChart2" ></canvas>
     </div>  
-   </div>
+ 
     <script src="js/Analysisscript.js"></script>
+    <script src="js/graph.js"></script>
     
 
 </body>

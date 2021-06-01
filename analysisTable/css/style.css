@@ -1,5 +1,5 @@
 @import "https://fonts.googleapis.com/css?family=Montserrat:300,400,700";
-.section {
+/* .section {
     display: flex;
   }
   
@@ -8,10 +8,8 @@
   }
   
   .element-right {
-    padding-left: 450px;
-
     flex-grow: 1;
-  }
+  } */
 td[data-href]{
     cursor: pointer;
 }
