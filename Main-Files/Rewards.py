@@ -120,7 +120,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
             'Hotspot_24H_HNT' : round(total24hrs[i], 2),
             'Hotspot_24H_USD' : round(total24hrs[i] * price, 2),
             'Change_24H' : rewardChange[i],
-            'Sync_Status': syncStatus[i],
+            'Synced_Status': syncStatus[i],
             'Hotspot_30D_HNT' : round(total30days[i], 2),
             'Hotspot_30D_USD' : round(total30days[i] * price, 2),
             'Wallet_Balance' : round(balanceList[i] / 100000000 , 2),
