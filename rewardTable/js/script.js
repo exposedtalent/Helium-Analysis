@@ -1,12 +1,12 @@
-$(document).ready(function () {
-    $.getJSON("https://heliumfrontend.s3.amazonaws.com/data.json", function (data) {
+$(document).ready(function() {
+    $.getJSON("../data.json", function(data) {
         let array = data["Hotspots"];
         let dict = data["Balance"];
 
         buildBalTable(dict);
         buildTable(array);
 
-        $("th").on("click", function () {
+        $("th").on("click", function() {
             var column = $(this).data("column");
             var order = $(this).data("order");
 
@@ -20,12 +20,12 @@ $(document).ready(function () {
             buildTable(array);
         });
         // Adds the even listeners for the hotspots addr
-        $(document.body).on("click", "td[data-href]", function (){
+        $(document.body).on("click", "td[data-href]", function() {
             $(this).text();
             window.location.href = this.dataset.href
         })
 
-    }).fail(function () {
+    }).fail(function() {
         console.log("An error has occurred.");
     });
 });
@@ -47,16 +47,30 @@ function buildBalTable(data) {
 function buildTable(data) {
     let table = document.getElementById("myTable");
     table.innerHTML = "";
-    base_url = "https://mto1ratv44.execute-api.us-east-2.amazonaws.com/default/invoke-HeliumRewards/";
+    base_url = "https://gfz4azqik2.execute-api.us-east-2.amazonaws.com/default/invoke-HeliumRewards/";
     console.log(base_url)
     for (let i = 0; i < data.length; i++) {
+        let syncedColor;
+        let changeColor;
+        if (data[i].Synced_Status == "Synced") {
+            syncedColor = 'green';
+        } else {
+            syncedColor = 'red';
+        }
+        if (data[i].Change_24H >= 0) {
+            changeColor = 'green';
+        } else {
+            changeColor = 'red';
+        }
+
         let row = `<tr>
             <td>${data[i].Hotspot_Owner}</td>
             <td data-href="${base_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Address}</td>
             <td>${data[i].Hotspot_Name}</td>
             <td>${data[i].Hotspot_24H_HNT}</td>
             <td>${data[i].Hotspot_24H_USD}</td>
-            <td>${data[i].Change_24H}</td>
+            <td style="color :${changeColor}">${data[i].Change_24H}</td>
+            <td style="color :${syncedColor} ">${data[i].Synced_Status}</td>
             <td>${data[i].Hotspot_30D_HNT}</td>
             <td>${data[i].Hotspot_30D_USD}</td>
             <td>${data[i].Wallet_Balance}</td>
