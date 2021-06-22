@@ -3,12 +3,13 @@ import pandas as pd
 import numpy as np
 import json
 import codecs
+import time
+
 
 rewardList = None
+start_time = time.time()
 
-    
 def main():
-
     # This is to figure out the time
     twentyfourHour = '-2%20day'
     thirtyDays = '-30%20day'
@@ -42,7 +43,7 @@ def main():
     # put the result into a json
     with open('data.json','w') as jsonFile:
         json.dump(rewardList, jsonFile)
-    
+    print("Process finished --- %s seconds ---" % (time.time() - start_time))
     
     # datajson = json2html.convert(json = jsonList)
     # change to this for aws Lambda instead of print
@@ -59,39 +60,6 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     total30days = []
     rewardChange = []
     syncStatus = []
-    
-    for i in range(len(hotspot)):
-        # URL for the 24 hours
-        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour + '&bucket=day'
-        response = requests.get(url)
-        new_data = response.json()
-        reward24hrs = new_data['data'][0]['total']
-        reward2day = new_data['data'][1]['total']
-        change = (round((reward24hrs - reward2day) / reward2day * 100, 2))
-        rewardChange.append(change)
-        total24hrs.append(reward24hrs)
-        
-        # URL for the 30 days 
-        url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + thirtyDays
-        response = requests.get(url)
-        new_data = response.json()
-        reward30days = new_data['data']['total']
-        total30days.append(reward30days)
-        
-        # Check if the hotspot is syncing  
-        url='https://api.helium.io/v1/hotspots/' + hotspot[i] 
-        response = requests.get(url)
-        new_data = response.json()
-        height = new_data['data']['status']['height']
-        block = new_data['data']['block']
-        if((block - height) >= 200):
-            syncStatus.append("Not Synced")
-        else:
-            syncStatus.append("Synced")
-
-    
-    # Append the dict into a list
-    # Function to get tthe total balance of all accounts
     balanceList = []
     
     # Binance API to get the current rate
@@ -100,35 +68,72 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     new_data = response.json()
     price = float(new_data['price'])
     
-    # For loop to get the account balance of the user
-    for i in range(len(accAddr)):
-        url='https://api.helium.io/v1/accounts/' + accAddr[i] + '/stats'
+    
+    # for loop to calculate the rewards and the acc
+    
+    for i  in range(len(hotspot)):
+        # Check if the hotspot is syncing  
+        url='https://api.helium.io/v1/hotspots/' + hotspot[i] 
         response = requests.get(url)
         new_data = response.json()
-        balance = new_data['data']['last_day'][0]['balance']
-        balanceList.append(balance)
-        
+        height = new_data['data']['status']['height']
+        block = new_data['data']['block']
+        if(height == None):
+            syncStatus.append("Not Synced")
+        elif((block - height) >= 250 ):
+            syncStatus.append("Not Synced")
+        else:
+            syncStatus.append("Synced")
+        if(height != None  ):
+            # URL for the 24 hours
+            url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + twentyfourHour + '&bucket=day'
+            response = requests.get(url)
+            new_data = response.json()
+            reward24hrs = new_data['data'][0]['total']
+            reward2day = new_data['data'][1]['total']
+
+            if(reward24hrs == 0 and reward2day == 0):
+                change = 0
+            else:
+                change = (round((reward24hrs - reward2day) / reward2day * 100, 2))
+            rewardChange.append(change)
+            total24hrs.append(reward24hrs)
+            
+            # URL for the 30 days 
+            url='https://api.helium.io/v1/hotspots/' + hotspot[i] + '/rewards/sum?min_time=' + thirtyDays
+            response = requests.get(url)
+            new_data = response.json()
+            reward30days = new_data['data']['total']
+            total30days.append(reward30days)
+            
+            # To get the account balance of the users
+            url='https://api.helium.io/v1/accounts/' + accAddr[i] + '/stats'
+            response = requests.get(url)
+            new_data = response.json()
+            balance = new_data['data']['last_day'][0]['balance']
+            balanceList.append(balance)
+            
+            # Put eveything into a dict
+            rewardDict = {
+                'Hotspot_Owner' : hostName[i],
+                'Hotspot_Address' : hotspot[i],
+                'Hotspot_Name' : hotspotName[i],
+                'Hotspot_24H_HNT' : round(total24hrs[i], 2),
+                'Hotspot_24H_USD' : round(total24hrs[i] * price, 2),
+                'Change_24H' : rewardChange[i],
+                'Synced_Status': syncStatus[i],
+                'Hotspot_30D_HNT' : round(total30days[i], 2),
+                'Hotspot_30D_USD' : round(total30days[i] * price, 2),
+                'Wallet_Balance' : round(balanceList[i] / 100000000 , 2),
+                'Wallet_Balance_USD' : round((balanceList[i] / 100000000) * price , 2),
+            
+            }
+            rewardList.append(rewardDict)
+            
     # Calculations
     bal = sum(balanceList) / 100000000
     usdBal = bal * price
-    for i in range(len(hotspot)):
-        # Put eveything into a dict
-        rewardDict = {
-            'Hotspot_Owner' : hostName[i],
-            'Hotspot_Address' : hotspot[i],
-            'Hotspot_Name' : hotspotName[i],
-            'Hotspot_24H_HNT' : round(total24hrs[i], 2),
-            'Hotspot_24H_USD' : round(total24hrs[i] * price, 2),
-            'Change_24H' : rewardChange[i],
-            'Synced_Status': syncStatus[i],
-            'Hotspot_30D_HNT' : round(total30days[i], 2),
-            'Hotspot_30D_USD' : round(total30days[i] * price, 2),
-            'Wallet_Balance' : round(balanceList[i] / 100000000 , 2),
-            'Wallet_Balance_USD' : round((balanceList[i] / 100000000) * price , 2),
             
-        }
-        rewardList.append(rewardDict)
-    
     balanceDict = {
         'Hotspots_24H_HNT' : round(sum(total24hrs), 2),
         'Hotspots_24H_USD' : round(sum(total24hrs) * price, 2),
