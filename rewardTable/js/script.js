@@ -53,12 +53,12 @@ function buildTable(data) {
         let syncedColor;
         let changeColor;
         if (data[i].Synced_Status == "Synced") {
-            syncedColor = 'green';
+            syncedColor = 'lightgreen';
         } else {
             syncedColor = 'red';
         }
         if (data[i].Change_24H >= 0) {
-            changeColor = 'green';
+            changeColor = 'lightgreen';
         } else {
             changeColor = 'red';
         }
