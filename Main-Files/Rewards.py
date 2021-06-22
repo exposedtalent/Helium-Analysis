@@ -135,6 +135,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     usdBal = bal * price
             
     balanceDict = {
+        'HNT_Price': round(price, 2),
         'Hotspots_24H_HNT' : round(sum(total24hrs), 2),
         'Hotspots_24H_USD' : round(sum(total24hrs) * price, 2),
         'Hotspots_30D_HNT' : round(sum(total30days), 2),
