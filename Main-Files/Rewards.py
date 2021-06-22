@@ -58,6 +58,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
     total24hrs = []
     total30days = []
     rewardChange = []
+    syncStatus = []
     
     for i in range(len(hotspot)):
         # URL for the 24 hours
@@ -76,6 +77,17 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
         new_data = response.json()
         reward30days = new_data['data']['total']
         total30days.append(reward30days)
+        
+        # Check if the hotspot is syncing  
+        url='https://api.helium.io/v1/hotspots/' + hotspot[i] 
+        response = requests.get(url)
+        new_data = response.json()
+        height = new_data['data']['status']['height']
+        block = new_data['data']['block']
+        if((block - height) >= 200):
+            syncStatus.append("Not Synced")
+        else:
+            syncStatus.append("Synced")
 
     
     # Append the dict into a list
@@ -108,6 +120,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
             'Hotspot_24H_HNT' : round(total24hrs[i], 2),
             'Hotspot_24H_USD' : round(total24hrs[i] * price, 2),
             'Change_24H' : rewardChange[i],
+            'Sync_Status': syncStatus[i],
             'Hotspot_30D_HNT' : round(total30days[i], 2),
             'Hotspot_30D_USD' : round(total30days[i] * price, 2),
             'Wallet_Balance' : round(balanceList[i] / 100000000 , 2),
