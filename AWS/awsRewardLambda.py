@@ -79,14 +79,11 @@ def lambda_handler(event, context):
         <th data-column='HotspotOwner' data-order='desc'>Hotspot Owner &#9650</th>
         <th data-column='HotspotAddress' data-order='desc'>Hotspot Address &#9650</th>
         <th data-column='HotspotName' data-order='desc'>Hotspot Name &#9650</th>
-        <th data-column='Hotspot24HHNT' data-order='desc'>Hotspot 24H HNT &#9650</th>
-        <th data-column='Hotspot24HUSD' data-order='desc'>Hotspot 24H USD &#9650</th>
-        <th data-column='Change' data-order='desc'>24H Change &#9650</th>
         <th data-column='Synced Status' data-order='desc'>Synced Status &#9650</th>
+        <th data-column='Hotspot24HHNT' data-order='desc'>Hotspot 24H HNT &#9650</th>
+        <th data-column='Change' data-order='desc'>24H Change &#9650</th>
         <th data-column='Hotspot30DHNT' data-order='desc'>Hotspot 30D HNT &#9650</th>
-        <th data-column='Hotspot30DUSD' data-order='desc'>Hotspot 30D USD &#9650</th>
         <th data-column='WalletBalance' data-order='desc'>Wallet Balance &#9650</th>
-        <th data-column='WalletBalanceUSD' data-order='desc'>Wallet Balance USD &#9650</th>
         </tr>
     
       <tbody id="myTable">
@@ -158,14 +155,11 @@ def lambda_handler(event, context):
             <td>${data[i].Hotspot_Owner}</td>
             <td data-href="${base_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Address}</td>
             <td>${data[i].Hotspot_Name}</td>
-            <td>${data[i].Hotspot_24H_HNT}</td>
-            <td>${data[i].Hotspot_24H_USD}</td>
-            <td style="color :${changeColor}">${data[i].Change_24H}</td>
             <td style="color :${syncedColor} ">${data[i].Synced_Status}</td>
+            <td>${data[i].Hotspot_24H_HNT}</td>
+            <td style="color :${changeColor}">${data[i].Change_24H}</td>
             <td>${data[i].Hotspot_30D_HNT}</td>
-            <td>${data[i].Hotspot_30D_USD}</td>
             <td>${data[i].Wallet_Balance}</td>
-            <td>${data[i].Wallet_Balance_USD}</td>
         </tr>`;
         table.innerHTML += row;
         }
@@ -213,7 +207,7 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
         new_data = response.json()
         height = new_data['data']['status']['height']
         block = new_data['data']['block']
-        if(height == None or (block - height) >= 250):
+        if(height == None or (block - height) >= 275):
             syncStatus.append("Not Synced")
             sendEmail(hotspot[i])
         else:
@@ -252,15 +246,12 @@ def get_rewards(hotspot, twentyfourHour, thirtyDays, hostName, hotspotName, accA
                 'Hotspot_Owner' : hostName[i],
                 'Hotspot_Address' : hotspot[i],
                 'Hotspot_Name' : hotspotName[i],
-                'Hotspot_24H_HNT' : round(total24hrs[i], 2),
-                'Hotspot_24H_USD' : round(total24hrs[i] * price, 2),
-                'Change_24H' : rewardChange[i],
                 'Synced_Status': syncStatus[i],
+                'Hotspot_24H_HNT' : round(total24hrs[i], 2),
+                'Change_24H' : rewardChange[i],
                 'Hotspot_30D_HNT' : round(total30days[i], 2),
-                'Hotspot_30D_USD' : round(total30days[i] * price, 2),
                 'Wallet_Balance' : round(balanceList[i] / 100000000 , 2),
-                'Wallet_Balance_USD' : round((balanceList[i] / 100000000) * price , 2),
-            
+
             }
             rewardList.append(rewardDict)
     # Calculations
