@@ -1,11 +1,6 @@
 from datetime import date, timedelta
-import pandas as pd
-import numpy as np
-import json
 import boto3
-from boto3.dynamodb.conditions import Key, And, Attr, Between
-
-import requests
+from boto3.dynamodb.conditions import Key
 
 def lambda_handler(event, context):
     
@@ -16,7 +11,7 @@ def lambda_handler(event, context):
     td = timedelta(1)
     d = todayDate + td
     upperDate = '%s'%d
-    td = timedelta(3)
+    td = timedelta(2)
     d = todayDate - td
     lowerDate = '%s'%d
     
@@ -29,9 +24,8 @@ def lambda_handler(event, context):
 
     response = table.query(
     #   FilterExpression= Attr("Witnesses").between(1,5),
-       KeyConditionExpression=Key('Hotspot').eq('112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg') & Key('WitnesseTime').between(lowerDate, upperDate)
+       KeyConditionExpression=Key('Hotspot').eq(hotspots[0]) & Key('WitnesseTime').between(lowerDate, upperDate)
     )
-
     occurOne = occurTwo = occurThree = occurFour = occurMore = 0
 
     for i in range(len(response['Items'])):
@@ -61,41 +55,41 @@ def lambda_handler(event, context):
     hotspotName = """\nlet hotspotName = "%s";"""%hotspots[0]
     htmlTop = """
         <!DOCTYPE html>
-        <html >
-        <head>
-        <meta charset="UTF-8">
-        <title>Wifi Mist</title>
-        
-        <script src="https://code.highcharts.com/highcharts.js"></script>
-        <script src="https://code.highcharts.com/modules/exporting.js"></script>
-        <script src="https://code.highcharts.com/modules/export-data.js"></script>
-        <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js" integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <link rel="stylesheet" href= "https://heliumfrontend.s3.amazonaws.com/style.css">
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>WifiMist</title>
+  <link rel="stylesheet" href="https://heliumfrontend.s3.amazonaws.com/newStyle.css">
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js" integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-        </head>
-        
-        <body style="background-color:white;">
-        <h1>Witnesses</h1>
-        <div style="overflow-x:auto;">
-        <table class="rwd-table">
-            <tr>
-            <th>Hotspot Name </th>
-            <th>1 Witnesses</th>
-            <th>2 Witnesses</th>
-            <th>3 Witnesses</th>
-            <th>4 Witnesses</th>
-            <th>5 Witnesses and up</th>
-            <th>Total Witnesses from 1-4</th>
-            <th>Total Witnesses</th>
-            </tr>
-        <tbody id="myTable">
-        
-        
-        </table>
-        </div>
+</head>
+<body>
+<h1><span class="peach">Witnesse Count</pan></h1>
+<h2><span class="peach">for past 3 days</span></h2>
+<table class="container">
+	<thead>
+		<tr>
+			<th>  Hotspot </th>
+			<th>1 Wit</th>
+			<th>2 Wit</th>
+			<th >3 Wit</th>
+			<th >4 Wit</th>
+			<th >5 Wit and up</th>
+			<th >Wit from 1-4</th>
+			<th >Wit</th>
+  		</tr>
+  <tbody id="myTable">
+	</thead>
+</table>
+</div>
         <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
-        <h1> 24 Hrs & 30 Day Rewards </h1>
+        <h1><span class="peach">24 Hrs & 30 Day Rewards</pan></h1>
+
         <figure class="highcharts-figure">
           <div id="con7day" ></div>
           </figure>
@@ -107,14 +101,24 @@ def lambda_handler(event, context):
     """
     htmlBottom = """
         let url30day = 'https://api.helium.io/v1/hotspots/' + hotspotName + '/rewards/sum?min_time=-30%20day&bucket=day'
-        console.log(url30day);
         let url1day = 'https://api.helium.io/v1/hotspots/' + hotspotName + '/rewards/sum?min_time=-1%20day&bucket=hour'
+        let name = 'https://api.helium.io/v1/hotspots/' + hotspotName
         let totalArray30day = []
         let timeArray30day = []
-        let list30Day =[]
+        let list30Day = []
         let totalArray1day = []
         let timeArray1day = []
-        let list1Day =[]
+        let list1Day = []
+
+        axios.get(name)
+            .then(response => {
+                let hName = response.data.data['name'];
+                
+                buildTable(array, hName);
+            }, error => {
+                console.log(error);
+            })
+        
         axios.get(url30day)
             .then(response => {
                 var count = 0;
@@ -150,13 +154,12 @@ def lambda_handler(event, context):
                 console.log(error);
             })
         
-        buildTable(array, hotspotName);
         
-        function buildTable(data, hotspotName) {
+        
+        function buildTable(data, hName) {
             let table = document.getElementById("myTable");
-
             let row = `<tr>
-                <td>${hotspotName}</td>
+                <td>${hName}</td>
                 <td>${data.Witnesses_1}</td>
                 <td>${data.Witnesses_2}</td>
                 <td>${data.Witnesses_3}</td>
@@ -169,103 +172,115 @@ def lambda_handler(event, context):
     
         }
     function buildGraph(list7Day) {
-        Highcharts.chart('con7day', {
-            chart: {
-              type: 'column'
+    Highcharts.chart("con7day", {
+        chart: {
+            backgroundColor: "#2C3446",
+            type: "column",
+        },
+        title: {
+            text: "24 Hour Reward",
+            style: {
+                color: "#FB667A",
+                font: 'bold 16px "Trebuchet MS", Verdana, sans-serif',
             },
-            title: {
-              text: '24 Hour Reward'
-            },
-            
-            xAxis: {
-              type: 'category',
-              labels: {
+        },
+
+        xAxis: {
+            type: "category",
+            labels: {
                 rotation: -45,
                 style: {
-                  fontSize: '13px',
-                  fontFamily: 'Verdana, sans-serif'
-                }
-              }
+                    fontSize: "13px",
+                    fontFamily: "Verdana, sans-serif",
+                },
             },
-            yAxis: {
-              min: 0,
-              title: {
-                text: 'HNT'
-              }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: "HNT",
             },
-            legend: {
-              enabled: false
-            },
-            tooltip: {
-              pointFormat: 'HNT: <b>{point.y:.1f} HNT</b>'
-            },
-            series: [{
-              name: 'HNT',
-              data: list7Day,
-              dataLabels: {
+        },
+        legend: {
+            enabled: false,
+        },
+        tooltip: {
+            pointFormat: "HNT: <b>{point.y:.1f} HNT</b>",
+        },
+        series: [{
+            name: "HNT",
+            data: list7Day,
+            color: "#FB667A",
+            dataLabels: {
                 enabled: true,
                 rotation: -90,
-                color: '#FFFFFF',
-                align: 'right',
-                format: '{point.y:.1f}', // one decimal
+                color: "#FFFFFF",
+                align: "right",
+                format: "{point.y:.1f}", // one decimal
                 y: 20, // 10 pixels down from the top
                 style: {
-                  fontSize: '13px',
-                  fontFamily: 'Verdana, sans-serif'
-                }
-              }
-            }]
-          });
-    }
-    
-    function buildGraph2(list30Day) {
-        Highcharts.chart('con30day', {
-            chart: {
-              type: 'column'
+                    fontSize: "13px",
+                    fontFamily: "Verdana, sans-serif",
+                },
             },
-            title: {
-              text: '30 Day Reward'
+        }, ],
+    });
+}
+
+function buildGraph2(list30Day) {
+    Highcharts.chart("con30day", {
+        chart: {
+            backgroundColor: "#2C3446",
+            type: "column",
+        },
+        title: {
+            text: "30 Day Reward",
+            style: {
+                color: "#FB667A",
+                font: 'bold 16px "Trebuchet MS", Verdana, sans-serif',
             },
-            xAxis: {
-              type: 'category',
-              labels: {
+        },
+        xAxis: {
+            type: "category",
+            labels: {
                 rotation: -45,
                 style: {
-                  fontSize: '13px',
-                  fontFamily: 'Verdana, sans-serif'
-                }
-              }
+                    fontSize: "13px",
+                    fontFamily: "Verdana, sans-serif",
+                },
             },
-            yAxis: {
-              min: 0,
-              title: {
-                text: 'HNT'
-              }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: "HNT",
             },
-            legend: {
-              enabled: false
-            },
-            tooltip: {
-              pointFormat: 'HNT: <b>{point.y:.1f} HNT</b>'
-            },
-            series: [{
-              name: 'HNT',
-              data: list30Day,
-              dataLabels: {
+        },
+        legend: {
+            enabled: false,
+        },
+        tooltip: {
+            pointFormat: "HNT: <b>{point.y:.1f} HNT</b>",
+        },
+        series: [{
+            name: "HNT",
+            data: list30Day,
+            color: "#FB667A",
+            dataLabels: {
                 enabled: true,
                 rotation: -90,
-                color: '#FFFFFF',
-                align: 'right',
-                format: '{point.y:.1f}', // one decimal
+                color: "#2C3446",
+                align: "right",
+                format: "{point.y:.1f}", // one decimal
                 y: 5, // 10 pixels down from the top
                 style: {
-                  fontSize: '10px',
-                  fontFamily: 'Verdana, sans-serif'
-                }
-              }
-            }]
-          });
-    }
+                    fontSize: "10px",
+                    fontFamily: "Verdana, sans-serif",
+                },
+            },
+        }, ],
+    });
+}
         </script>
         </body>
         </html>
