@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 import boto3
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key,Attr
 
 def lambda_handler(event, context):
     
@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     td = timedelta(1)
     d = todayDate + td
     upperDate = '%s'%d
-    td = timedelta(2)
+    td = timedelta(3)
     d = todayDate - td
     lowerDate = '%s'%d
     
@@ -27,19 +27,37 @@ def lambda_handler(event, context):
        KeyConditionExpression=Key('Hotspot').eq(hotspots[0]) & Key('WitnesseTime').between(lowerDate, upperDate)
     )
     occurOne = occurTwo = occurThree = occurFour = occurMore = 0
+    
+    data = table.query(
+        FilterExpression = Attr("Witnesses").eq(1),
+        KeyConditionExpression = Key("Hotspot").eq(hotspots[0]) & Key("WitnesseTime").between(lowerDate, upperDate)
+    )
+    occurOne = len(data['Items'])
+    
+    data = table.query(
+        FilterExpression = Attr("Witnesses").eq(2),
+        KeyConditionExpression = Key("Hotspot").eq(hotspots[0]) & Key("WitnesseTime").between(lowerDate, upperDate)
+    )
+    occurTwo = len(data['Items'])
 
-    for i in range(len(response['Items'])):
-        if(response['Items'][i]['Witnesses'] == 1):
-            occurOne = occurOne + 1
-        elif(response['Items'][i]['Witnesses'] == 2):
-            occurTwo = occurTwo + 1
-        elif(response['Items'][i]['Witnesses'] == 3):
-            occurThree = occurThree + 1
-        elif(response['Items'][i]['Witnesses'] == 4):
-            occurFour = occurFour + 1
-        else:
-            occurMore = occurMore + 1
-        
+    data = table.query(
+        FilterExpression = Attr("Witnesses").eq(3),
+        KeyConditionExpression = Key("Hotspot").eq(hotspots[0]) & Key("WitnesseTime").between(lowerDate, upperDate)
+    )
+    occurThree = len(data['Items'])
+
+    data = table.query(
+        FilterExpression = Attr("Witnesses").eq(4),
+        KeyConditionExpression = Key("Hotspot").eq(hotspots[0]) & Key("WitnesseTime").between(lowerDate, upperDate)
+    )
+    occurFour = len(data['Items'])
+
+    data = table.query(
+        FilterExpression = Attr("Witnesses").between(5, 25),
+        KeyConditionExpression = Key("Hotspot").eq(hotspots[0]) & Key("WitnesseTime").between(lowerDate, upperDate)
+    )
+    occurMore = len(data['Items'])
+    
     onetofour = occurOne +occurTwo + occurThree + occurFour
     witnesseDict = {
         "Witnesses_1" : occurOne,
@@ -79,9 +97,9 @@ def lambda_handler(event, context):
 			<th>2 Wit</th>
 			<th >3 Wit</th>
 			<th >4 Wit</th>
-			<th >5 Wit and up</th>
-			<th >Wit from 1-4</th>
-			<th >Wit</th>
+			<th >5 and up</th>
+			<th >Wit 1-4</th>
+			<th >Total</th>
   		</tr>
   <tbody id="myTable">
 	</thead>
@@ -201,6 +219,11 @@ def lambda_handler(event, context):
                 text: "HNT",
             },
         },
+        plotOptions: {
+            series: {
+                borderColor: "#FB667A",
+            },
+        },
         legend: {
             enabled: false,
         },
@@ -254,6 +277,11 @@ function buildGraph2(list30Day) {
             min: 0,
             title: {
                 text: "HNT",
+            },
+        },
+        plotOptions: {
+            series: {
+                borderColor: "#FB667A",
             },
         },
         legend: {
