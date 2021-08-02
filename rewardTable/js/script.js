@@ -22,14 +22,12 @@ $(document).ready(function() {
         // Adds the even listeners for the hotspots addr
         $(document.body).on("click", "td[data-href]", function() {
             $(this).text();
-            window.location.href = this.dataset.href
-        })
-
+            window.location.href = this.dataset.href;
+        });
     }).fail(function() {
         console.log("An error has occurred.");
     });
 });
-
 
 function buildBalTable(data) {
     let table = document.getElementById("myBalTable");
@@ -47,34 +45,42 @@ function buildBalTable(data) {
 function buildTable(data) {
     let table = document.getElementById("myTable");
     table.innerHTML = "";
-    base_url = "https://gfz4azqik2.execute-api.us-east-2.amazonaws.com/default/invoke-HeliumRewards/";
-    console.log(base_url)
+    base_url =
+        "https://gfz4azqik2.execute-api.us-east-2.amazonaws.com/default/invoke-HeliumRewards/";
+
+    console.log(base_url);
     for (let i = 0; i < data.length; i++) {
+        let heliumExplorer_url = "https://explorer.helium.com/hotspots/";
         let syncedColor;
         let changeColor;
-        if (data[i].Synced_Status == "Synced") {
-            syncedColor = 'lightgreen';
+        let rewardColor;
+        // Color for reward Scale
+        if (data[i].Reward_Scale > 0.7) {
+            rewardColor = "lightgreen";
+        } else if ((data[i].Reward_Scale < 0.7) & (data[i].Reward_Scale >= 0.5)) {
+            rewardColor = "yellow";
         } else {
-            syncedColor = 'red';
+            rewardColor = "red";
+        }
+        if (data[i].Synced_Status == "Synced") {
+            syncedColor = "lightgreen";
+        } else {
+            syncedColor = "red";
         }
         if (data[i].Change_24H >= 0) {
-            changeColor = 'lightgreen';
+            changeColor = "lightgreen";
         } else {
-            changeColor = 'red';
+            changeColor = "red";
         }
 
         let row = `<tr>
-            <td>${data[i].Hotspot_Owner}</td>
-            <td data-href="${base_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Address}</td>
-            <td>${data[i].Hotspot_Name}</td>
+            <td data-href="${heliumExplorer_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Owner}</td>
+            <td data-href="${base_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Name}</td>
             <td>${data[i].Hotspot_24H_HNT}</td>
-            <td>${data[i].Hotspot_24H_USD}</td>
             <td style="color :${changeColor}">${data[i].Change_24H}</td>
             <td style="color :${syncedColor} ">${data[i].Synced_Status}</td>
             <td>${data[i].Hotspot_30D_HNT}</td>
-            <td>${data[i].Hotspot_30D_USD}</td>
             <td>${data[i].Wallet_Balance}</td>
-            <td>${data[i].Wallet_Balance_USD}</td>
         </tr>`;
         table.innerHTML += row;
     }

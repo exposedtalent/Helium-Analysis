@@ -2,11 +2,11 @@ var myHeaders = new Headers();
 myHeaders.set('Cache-Control', 'no-store');
 var urlParams = new URLSearchParams(window.location.search);
 var tokens;
-var domain = "blogpool2";
-var region = "us-east-1";
-var appClientId = "71e7bu567e0idrl1dd29on514q";
-var userPoolId = "us-east-1_xo09hYD7P";
-var redirectURI = "https://dr7mdbyuoj45p.cloudfront.net/index.html";
+var domain = "DOMAIN-PREFIX";
+var region = "REGION";
+var appClientId = "APP-CLIENT-ID";
+var userPoolId = "USER-POOL-ID";
+var redirectURI = "YOUR-REDIRECT-URI";
 
 //Convert Payload from Base64-URL to JSON
 const decodePayload = payload => {
