@@ -1,3 +1,6 @@
 # Helium-Analysis
 This is the repo for python scripts to analyze and display the data coming in from helium hotspots. 
-All of the scripts are running on AWS Serverless Lambda Functions which get their data from Dyanamodb Tables. Using JavaScript and HTML I designed a front end which integrated with the AWS Lambda functions. 
+
+Backend is powered by Dynamodb, AWS Lambda and the Helium API. The security layer and role based access is provided using AWS Cognito. Using the database I use JavaScript, HTML and CSS to design a front end which is integrated with the AWS Lambda functions. 
+
+
