@@ -1,31 +1,34 @@
 from datetime import date, timedelta
 import boto3
 from boto3.dynamodb.conditions import Key,Attr
+from decimal import Decimal
 
 def lambda_handler(event, context):
     
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table("Hotspotdetail")
+    table = dynamodb.Table("HotspotWitnesses")
+    table2 = dynamodb.Table("HotspotBeacons")
     
     todayDate = date.today()
+    today = '%s'%todayDate
     td = timedelta(1)
     d = todayDate + td
     upperDate = '%s'%d
-    td = timedelta(3)
     d = todayDate - td
     lowerDate = '%s'%d
     
     # gets the uri from the url
     hotspots = []
     path = event['path']
-    # path = "/invoke/112XTwrpTBHjg4M1DWsLTcqsfJVZCPCYW2vNPJV7cZkpRg3JiKEg"
     x = path.split("/")
     hotspots.append(x[2])
-
-    response = table.query(
+    
+    response = table2.query(
     #   FilterExpression= Attr("Witnesses").between(1,5),
-       KeyConditionExpression=Key('Hotspot').eq(hotspots[0]) & Key('WitnesseTime').between(lowerDate, upperDate)
+       KeyConditionExpression=Key('Hotspot').eq(hotspots[0]) & Key('BeaconTime').between(lowerDate, upperDate)
     )
+    beaconLen = len(response['Items'])
+    
     occurOne = occurTwo = occurThree = occurFour = occurMore = 0
     
     data = table.query(
@@ -56,6 +59,7 @@ def lambda_handler(event, context):
         FilterExpression = Attr("Witnesses").between(5, 25),
         KeyConditionExpression = Key("Hotspot").eq(hotspots[0]) & Key("WitnesseTime").between(lowerDate, upperDate)
     )
+
     occurMore = len(data['Items'])
     
     onetofour = occurOne +occurTwo + occurThree + occurFour
@@ -66,11 +70,23 @@ def lambda_handler(event, context):
         "Witnesses_4" : occurFour,
         "Witnesses_5_and_up" : occurMore,
         "Total_Witnesses_from_1_to_4" : onetofour, 
-        "Total_Witnesses" : onetofour + occurMore
-        
+        "Total_Witnesses" : onetofour + occurMore,
+        "Beacon": beaconLen
+
     }
+    beacon = []
+    for i in range(len(response['Items'])):
+        data = {
+            'Challengee': response['Items'][i]['Challengee'],
+            'Hotspot': response['Items'][i]['Hotspot'],
+            'BeaconTime': response['Items'][i]['BeaconTime'],
+            'Witnesses': str(response['Items'][i]['Witnesses']),
+        }
+        beacon.append(data)
+    beaconDict = {"beacon": beacon}
     WitnesseshtmlList = """let array = %s;"""%witnesseDict
     hotspotName = """\nlet hotspotName = "%s";"""%hotspots[0]
+    beaconhtml = """\nlet beacon = %s;"""%beacon
     htmlTop = """
         <!DOCTYPE html>
 <html lang="en" >
@@ -83,12 +99,13 @@ def lambda_handler(event, context):
   <script src="https://code.highcharts.com/modules/export-data.js"></script>
   <script src="https://code.highcharts.com/modules/accessibility.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+  <link rel="shortcut icon" type="image/jpg" href="https://heliumfrontend.s3.amazonaws.com/LogoWifimist.jpg"/>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js" integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 </head>
 <body>
-<h1><span class="peach">Witnesse Count</pan></h1>
-<h2><span class="peach">for past 3 days</span></h2>
+<h1><span class="peach">Witness Count</pan></h1>
 <table class="container">
 	<thead>
 		<tr>
@@ -100,8 +117,19 @@ def lambda_handler(event, context):
 			<th >5 and up</th>
 			<th >Wit 1-4</th>
 			<th >Total</th>
+			<th >Beacon</th>
   		</tr>
   <tbody id="myTable">
+	</thead>
+</table>
+<h1><span class="peach">Beacons</pan></h1>
+<table class="container">
+	<thead>
+		<tr>
+			<th>Time</th>
+      <th> Witnesses</th>
+  		</tr>
+  <tbody id="myTableBeacon">
 	</thead>
 </table>
 </div>
@@ -136,6 +164,8 @@ def lambda_handler(event, context):
             }, error => {
                 console.log(error);
             })
+        buildBeaconTable(beacon);
+
         
         axios.get(url30day)
             .then(response => {
@@ -154,13 +184,17 @@ def lambda_handler(event, context):
             }, error => {
                 console.log(error);
             })
-        // for 7 days
+        // for 24 hrs
         axios.get(url1day)
             .then(response => {
                 var count = 0;
                 for (let i = response.data.data.length - 1; i >= 0; i--) {
                     var reward = response.data.data[i]['total'];
-                    var time = response.data.data[i]['timestamp'];
+                    var str = response.data.data[i]['timestamp'];
+                    var res = str.split(/(?:T|Z)+/);
+                    var temp = res[1];
+                    res = temp.split(".");
+                    time = res[0];
                     totalArray1day.push(reward)
                     timeArray1day.push(time)
                     list1Day.push([timeArray1day[count], totalArray1day[count]])
@@ -185,9 +219,38 @@ def lambda_handler(event, context):
                 <td>${data.Witnesses_5_and_up}</td>
                 <td>${data.Total_Witnesses_from_1_to_4}</td>
                 <td>${data.Total_Witnesses}</td>
+                <td>${data.Beacon}</td>
             </tr>`;
             table.innerHTML += row;
     
+        }
+        function buildBeaconTable(data) {
+            if(data.length != 0){
+                let table = document.getElementById("myTableBeacon");
+                table.innerHTML = " ";
+                console.log(data.length);
+            
+                for (let i = 0; i < data.length; i++) {
+                    let str = data[i].BeaconTime;
+                    let row = `<tr>
+                    <td>${str}</td>
+                    <td>${data[i].Witnesses}</td>
+                    </tr>`;
+                    table.innerHTML += row;
+                }
+            }
+            else{
+                let table = document.getElementById("myTableBeacon");
+                table.innerHTML = " ";
+
+                
+                let row = `<tr>
+                <td>${null}</td>
+                <td>${null}</td>
+                </tr>`;
+                table.innerHTML += row;
+                
+            }
         }
     function buildGraph(list7Day) {
     Highcharts.chart("con7day", {
@@ -314,7 +377,7 @@ function buildGraph2(list30Day) {
         </html>
     """
     
-    finalhtml = htmlTop + WitnesseshtmlList + hotspotName + htmlBottom
+    finalhtml = htmlTop + WitnesseshtmlList + hotspotName +beaconhtml + htmlBottom
     return{
         "statusCode": 200,
         "headers": {'Content-Type': 'text/html'},
