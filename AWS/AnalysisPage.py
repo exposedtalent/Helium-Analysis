@@ -23,6 +23,7 @@ def lambda_handler(event, context):
     x = path.split("/")
     hotspots.append(x[2])
     
+
     response = table2.query(
     #   FilterExpression= Attr("Witnesses").between(1,5),
        KeyConditionExpression=Key('Hotspot').eq(hotspots[0]) & Key('BeaconTime').between(lowerDate, upperDate)

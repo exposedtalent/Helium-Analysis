@@ -14,7 +14,7 @@ def lambda_handler(event, context):
     result =  {
         'statusCode': 302,
         'headers': {
-            'Location': 'https://dashboard.wifimist.com/Hotspots',
+            'Location': 'LINK',
         }
     }
     
