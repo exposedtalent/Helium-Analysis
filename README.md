@@ -1,3 +1,10 @@
-# Helium-Analysis
-This is the repo for python scripts to analyze and display the data coming in from helium hotspots. 
-All of the scripts are running on AWS Serverless Lambda Functions which get their data from Dyanamodb Tables. Using JavaScript and HTML I designed a front end which integrated with the AWS Lambda functions. 
+# Helium Dashboard
+
+Created a dashbaord using AWS services stated below. The dashboard showed the users the earnings and allowed users to track health of [Helium](https://www.helium.com/) hotspots. Designed and built a deep analysis engine to analyze activity and predict rewards for hotspots. Used AWS DynamoDB for storage, python-based lambda and API Gateway for backend, JavaScript for frontend, and AWS Cognito for user authentication and role-based access control.
+
+AWS services used : 
+- Lambda (Created the back and front end)
+- Cognito (User authentication)
+- Dynamodb (Database)
+- API Gatewaay (Created an REST API connected with the database)
+- CloudWatch (Scheduled events)
