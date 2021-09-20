@@ -8,13 +8,7 @@ def lambda_handler(event, context):
     table = dynamodb.Table("HotspotRewards")    
     response = table.scan()
     hotspotRewards = response['Items']
-    table2 = dynamodb.Table("HotspotRewardDict")
-    response = table2.scan()
-    HotspotRewardsDict = response['Items']
-    # table3 = dynamodb.Table("HotspotBeacons")
-    # table4 = dynamodb.Table('Users')
-    # response = table4.scan()
-    # users = response['Items']
+    
     
     # todayDate = date.today()
     # today = '%s'%todayDate
@@ -30,8 +24,6 @@ def lambda_handler(event, context):
     # )
     beaconLen = len(response['Items'])
     # adding data from the varibles into a string used for js script
-    balanceHtmlDict = """let dict = %s"""%HotspotRewardsDict
-    # adding data from the varibles into a string used for js script
     hotspotsHtmlList = """\nlet array = %s"""%hotspotRewards
     # adding data from the varibles into a string used for js script
     # beaconHtml = """\nlet beaconList = %s"""%beaconLen 
@@ -40,13 +32,15 @@ def lambda_handler(event, context):
     
     <!DOCTYPE html>
 <html lang="en">
-  <head>
-  <link rel="shortcut icon" href="#" />
-    <meta charset="utf-8" />
-    <title>MyApp</title>
-    <meta name="description" content="My Application" />
-    <meta name="author" content="Your Name" />
-  </head>
+  <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+      <script src="https://s.codepen.io/assets/libs/modernizr.js" type="text/javascript"></scrip>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <link rel="stylesheet" href="https://heliumfrontend.s3.amazonaws.com/Style1.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js" integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <link rel="shortcut icon" type="image/jpg" href="https://heliumfrontend.s3.amazonaws.com/LogoWifimist.jpg"/>
   <body>
     
     <script
@@ -200,7 +194,7 @@ def lambda_handler(event, context):
                 // Verify state matches
                 state = urlParams.get('state');
                 if (sessionStorage.getItem("pkce_state") != state) {
-                    alert("Invalid state");
+                    
                 } else {
         
                     // Fetch OAuth2 tokens from Cognito
@@ -258,22 +252,11 @@ def lambda_handler(event, context):
       <title>Wifi Mist</title>
       <link rel="shortcut icon" type="image/jpg" href="https://heliumfrontend.s3.amazonaws.com/LogoWifimist.jpg"/>
 
-          <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
-
-      <script src="https://s.codepen.io/assets/libs/modernizr.js" type="text/javascript"></scrip>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-  <link rel="stylesheet" href="https://heliumfrontend.s3.amazonaws.com/Style1.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js" integrity="sha512-otOZr2EcknK9a5aa3BbMR9XOjYKtxxscwyRHN6zmdXuRfJ5uApkHB7cz1laWk2g8RKLzV9qv/fl3RPwfCuoxHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+          
 
     </head>
 <body>
-<h1><span class="peach">Balance</pan></h1>
-<div class = "buttons">
-<button onclick="window.location.href=' https://3c3munmgd2.execute-api.us-east-1.amazonaws.com/default/putBalTable';">Refresh
-</button>
-</div>
+<h1><span class="peach">Ashok</pan></h1>
 <table class="container">
 	<thead>
 		<tr>
@@ -286,10 +269,31 @@ def lambda_handler(event, context):
 			<th > HNT</th>
 			<th > USD</th>
 
-  			<tbody id="myBalTable">
+  			<tbody id="AshokTable">
 		</tr>
 	</thead>
 </table>
+
+<h1><span class="peach">Mukesh</pan></h1>
+<table class="container">
+	<thead>
+		<tr>
+			<th> HNT Price</th>
+			<th> 24H HNT</th>
+			<th> 24H AVG</th>
+			<th> 24H USD</th>
+			<th > 30D HNT</th>
+			<th> 30D USD</th>
+			<th > HNT</th>
+			<th > USD</th>
+
+  			<tbody id="MukeshTable">
+		</tr>
+	</thead>
+</table>
+
+
+
 <style>
 .buttons {
     display: flex;
@@ -348,26 +352,99 @@ def lambda_handler(event, context):
             $(this).text();
             window.location.href = this.dataset.href
         })
+    let AshTable = []
+    let MukeshTable = []
+    let NormalTable = []
+    for (let i = 0; i < array.length; i++) {
     
-    buildBalTable(dict)
+        if (array[i]['Hotspot_Owner'].match(/Ash/g)) {
+            AshTable.push(array[i]);
+        }
+       
+        else if(array[i]['Hotspot_Owner'].match(/Mukesh/g)){
+            MukeshTable.push(array[i]);
+        }
+        
+    }
+    let hntAPI = 'https://api.binance.com/api/v3/ticker/price?symbol=HNTUSDT'
+    let HNTPrice;
+    
+    axios.get(hntAPI).then(
+        (response) => {
+            console.log(response)
+            HNTPrice = response['data']['price']
+            console.log(HNTPrice)
+            buildBalTableAsh(AshTable, HNTPrice)
+            buildBalTableMukesh(MukeshTable, HNTPrice)
+
+        },
+        (error) => {
+            console.log(error);
+        }
+    );
     
     
-    function buildBalTable(data){
-        let table = document.getElementById("myBalTable")
-        let avg = (data[0].Hotspots_24H_HNT) / num;
+    function buildBalTableAsh(data, price) {
+    let hotspot24hrs = [];
+    let hotspot24AVG;
+    let hotspot30day = [];
+    let total = [];
+
+    for (let i = 0; i < data.length; i++) {
+        hotspot24hrs.push(Number(data[i]['Hotspot_24H_HNT']));
+        hotspot30day.push(Number(data[i]['Hotspot_30D_HNT']));
+        total.push(Number(data[i]['Wallet_Balance']));
+    }
+    const sum24hrs = hotspot24hrs.reduce((a, b) => a + b)
+    hotspot24AVG = sum24hrs / data.length;
+    const sum30day = hotspot30day.reduce((a, b) => a + b)
+    const totalBal = total.reduce((a,b) => a + b)
+    
+    let table = document.getElementById("AshokTable");
         let row = `<tr>
-            <td>${data[0].HNT_Price}</td>
-            <td>${data[0].Hotspots_24H_HNT}</td>
-            <td>${avg.toFixed(2)}</td>
-            <td>${data[0].Hotspots_24H_USD}</td>
-            <td>${data[0].Hotspots_30D_HNT}</td>
-            <td>${data[0].Hotspots_30D_USD}</td>
-            <td>${data[0].Total_HNT}</td>
-            <td>${data[0].Total_USD}</td>
-         </tr>`
-        table.innerHTML += row
+            <td>${Math.round(price * 100) / 100 }</td>
+            <td>${Math.round(sum24hrs * 100 ) /100}</td>
+            <td>${Math.round(hotspot24AVG * 100) / 100}</td>
+            <td>${Math.round((sum24hrs * price) * 100)/ 100}</td>
+            <td>${Math.round(sum30day * 100) / 100}</td>
+            <td>${Math.round((sum30day * price) * 100 ) /100}</td>
+            <td>${Math.round(totalBal * 100) / 100}</td>
+            <td>${Math.round((totalBal * price) * 100) / 100}</td>
+            </tr>`;
+        table.innerHTML += row;
+    
+}
+    function buildBalTableMukesh(data, price) {
+        let hotspot24hrs = [];
+        let hotspot24AVG;
+        let hotspot30day = [];
+        let total = [];
+    
+        for (let i = 0; i < data.length; i++) {
+            hotspot24hrs.push(Number(data[i]['Hotspot_24H_HNT']));
+            hotspot30day.push(Number(data[i]['Hotspot_30D_HNT']));
+            total.push(Number(data[i]['Wallet_Balance']));
+        }
+        const sum24hrs = hotspot24hrs.reduce((a, b) => a + b)
+        hotspot24AVG = sum24hrs / data.length;
+        const sum30day = hotspot30day.reduce((a, b) => a + b)
+        const totalBal = total.reduce((a,b) => a + b)
+        
+        let table = document.getElementById("MukeshTable");
+            let row = `<tr>
+            <td>${Math.round(price * 100) / 100 }</td>
+            <td>${Math.round(sum24hrs * 100 ) /100}</td>
+            <td>${Math.round(hotspot24AVG * 100) / 100}</td>
+            <td>${Math.round((sum24hrs * price) * 100)/ 100}</td>
+            <td>${Math.round(sum30day * 100) / 100}</td>
+            <td>${Math.round((sum30day * price) * 100 ) /100}</td>
+            <td>${Math.round(totalBal * 100) / 100}</td>
+            <td>${Math.round((totalBal * price) * 100) / 100}</td>
+            </tr>`;
+        table.innerHTML += row;
     
     }
+
     
     function buildTable(data) {
     let table = document.getElementById("myTable");
@@ -410,7 +487,7 @@ def lambda_handler(event, context):
         let row = `<tr>
             <td data-href="${heliumExplorer_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Owner}</td>
             <td data-href="${base_url}${data[i].Hotspot_Address}">${data[i].Hotspot_Name}</td>
-            <td>${data[i].Block_Difference + " " }${syncedColor}</td>
+            <td >${data[i].Block_Difference + " " }${syncedColor}</td>
             <td style="color :${rewardColor}">${data[i].Reward_Scale}</td>
             <td>${data[i].Hotspot_24H_HNT}</td>
             <td style="color :${changeColor}">${data[i].Change_24H + "%"}</td>
@@ -428,7 +505,7 @@ def lambda_handler(event, context):
     </html>
     """
     # Finally put together the differernt html strings into one to be returned
-    finalHtml =  fHtml + topHtml + balanceHtmlDict + hotspotsHtmlList  + bottomHtml
+    finalHtml =  fHtml + topHtml + hotspotsHtmlList  + bottomHtml
     
     # returns the final html string and that is run on the client side
     return{
