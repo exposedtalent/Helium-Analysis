@@ -504,7 +504,7 @@ def lambda_handler(event, context):
     </body>
     </html>
     """
-    # Finally put together the differernt html strings into one to be returned
+    # Finally put together the different html strings into one to be returned
     finalHtml =  fHtml + topHtml + hotspotsHtmlList  + bottomHtml
     
     # returns the final html string and that is run on the client side
