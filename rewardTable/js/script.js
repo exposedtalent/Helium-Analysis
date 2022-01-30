@@ -1,11 +1,13 @@
+// gets the file with the json data 
 $(document).ready(function() {
     $.getJSON("../data.json", function(data) {
+        // build the table from the arrays 
         let array = data["Hotspots"];
         let dict = data["Balance"];
 
         buildBalTable(dict);
         buildTable(array);
-
+        //sorting 
         $("th").on("click", function() {
             var column = $(this).data("column");
             var order = $(this).data("order");
