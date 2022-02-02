@@ -6,5 +6,5 @@ AWS services used :
 - Lambda (Created the back and front end)
 - Cognito (User authentication)
 - Dynamodb (Database)
-- API Gatewaay (Created an REST API connected with the database)
+- API Gateway (Created an REST API connected with the database)
 - CloudWatch (Scheduled events)
